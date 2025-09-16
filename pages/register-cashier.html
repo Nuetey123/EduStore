@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduStore | Register Cashier</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/register-sales.css">
+</head>
+<body>
+  <div class="registration-container">
+    <div class="registration-card">
+      <div class="logo">➕</div>
+      <h1>Register Cashier</h1>
+      <p>Create a new Cashier account for EduStore</p>
+      
+      <form id="cashierForm">
+        <label for="cashierFirstName">First Name *</label>
+        <input type="text" id="cashierFirstName" placeholder="Enter first name" required>
+      
+        <label for="cashierLastName">Last Name *</label>
+        <input type="text" id="cashierLastName" placeholder="Enter last name" required>
+      
+        <label for="email">Email Address *</label>
+        <input type="email" id="email" placeholder="sales@gmail.com" required>
+      
+        <label for="phone">Phone Number</label>
+        <input type="tel" id="phone" placeholder="0244-123-456">
+      
+        <label for="address">Address *</label>
+        <input type="text" id="address" placeholder="Enter address" required>
+      
+        <button type="submit">Register Cashier</button>
+      </form>
+      <div id="statusMessage" class="status-message"></div>
+
+      <div class="footer">© 2025 EduStore. All rights reserved.</div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://uyqpvhcjsflogujbfheu.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5cXB2aGNqc2Zsb2d1amJmaGV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY5MTQ4NzQsImV4cCI6MjA3MjQ5MDg3NH0.Yn75_sNjk8-bZhvFRyGZML3rLWro0W4tsBXhdcE6aDA';
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // 🔑 function to generate random secure password
+    function generatePassword(length = 12) {
+      const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      let password = "";
+      for (let i = 0; i < length; i++) {
+        password += charset[Math.floor(Math.random() * charset.length)];
+      }
+      return password + "!"; // append special char
+    }
+
+    const form = document.getElementById('cashierForm');
+    const statusEl = document.getElementById('statusMessage');
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const firstName = document.getElementById('cashierFirstName').value.trim();
+      const lastName = document.getElementById('cashierLastName').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const phone = document.getElementById('phone').value.trim() || null;
+      const address = document.getElementById('address').value.trim();
+
+      // ✅ generate a temporary password
+      const tempPassword = generatePassword(); 
+      // Or: const tempPassword = generatePassword();
+
+      statusEl.textContent = 'Registering cashier...';
+      statusEl.style.color = 'blue';
+
+      try {
+        const { data, error } = await client.auth.signUp({
+        email,
+        password: tempPassword,
+        options: {
+          data: {
+            cashier_first_name: firstName,
+            cashier_last_name: lastName,
+            phone: phone || "",
+            address,
+            must_change_password: true
+          }
+        }
+      });
+
+
+        if (error) throw error;
+
+        // 👀 Show the generated password (admin can pass it to cashier)
+        statusEl.innerHTML = `
+          ✅ Cashier registered successfully!<br>
+          Temporary password: <b>${tempPassword}</b><br>
+          Cashier must change password at first login.
+        `;
+        statusEl.style.color = 'green';
+        form.reset();
+      } catch (err) {
+        console.error("Registration failed:", err);
+
+        let message = '❌ An unknown error occurred.';
+        if (err.message.includes('email')) {
+          message = '❌ This email is already registered.';
+        }
+
+        statusEl.textContent = message;
+        statusEl.style.color = 'red';
+      }
+    });
+  </script>
+</body>
+</html>

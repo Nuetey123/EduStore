@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduStore | Sales Viewer</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .sidebar { width: 250px; background: #f8f9fa; padding: 20px; height: 100vh; position: fixed; }
+    main { margin-left: 250px; padding: 20px; }
+    .card { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .search-box { max-width: 400px; margin-bottom: 20px; }
+    .item-list { font-size: 0.9em; color: #555; }
+  </style>
+</head>
+<body>
+<div class="d-flex">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <h2 class="mb-4">EduStore Admin</h2>
+    <nav class="nav flex-column">
+      <a href="admin-dashboard.html" class="nav-link">🏠 Dashboard</a>
+      <a href="inventory.html" class="nav-link">📦 Inventory</a>
+      <a href="stock-viewer.html" class="nav-link">📊 View Stocks</a>
+      <a href="#" class="nav-link">⚙️ Settings</a>
+      <a href="#" class="nav-link">🚪 Logout</a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-grow-1">
+    <header class="topbar mb-4">
+      <h1 class="h4">💵 Sales Viewer</h1>
+    </header>
+
+    <div class="container-fluid">
+      <!-- Search -->
+      <section class="card p-3 mb-4">
+        <div class="input-group search-box">
+          <input type="text" id="searchInput" class="form-control" placeholder="Search by ID, Student Name, or Class...">
+          <button class="btn btn-outline-secondary" type="button" onclick="filterSales()">Search</button>
+        </div>
+      </section>
+
+      <!-- Sales Table -->
+      <section class="card p-3">
+        <h2 class="h5 mb-3">📋 All Sales</h2>
+        <div class="table-responsive">
+          <table class="table table-striped align-middle" id="salesTable">
+            <thead class="table-dark">
+              <tr>
+                <th>ID</th>
+                <th>Student</th>
+                <th>Class</th>
+                <th>Total</th>
+                <th>Cashier</th>
+                <th>Sale Date</th>
+                <th>Created At</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="salesTableBody">
+              <!-- Sales will be inserted here -->
+            </tbody>
+          </table>
+        </div>
+        <div id="noResults" class="text-center py-5" style="display:none;">
+          <p class="text-muted">No sales found matching your search.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<!-- Supabase & App JS -->
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script>
+  // Initialize Supabase
+  const supabaseUrl = 'https://uyqpvhcjsflogujbfheu.supabase.co';
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5cXB2aGNqc2Zsb2d1amJmaGV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY5MTQ4NzQsImV4cCI6MjA3MjQ5MDg3NH0.Yn75_sNjk8-bZhvFRyGZML3rLWro0W4tsBXhdcE6aDA';
+  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+  let allSales = [];
+
+  // Load all sales
+  async function loadSales() {
+    const tbody = document.getElementById('salesTableBody');
+    tbody.innerHTML = '<tr><td colspan="8" class="text-center">Loading sales...</td></tr>';
+
+    try {
+      // ✅ Correct: use data, not sales
+      const { data, error } = await supabase
+        .from('sales')
+        .select(`
+          id,
+          student_name,
+          student_class,
+          total,
+          cashier_first_name,
+          cashier_last_name,
+          sale_date,
+          created_at
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      allSales = data || [];
+      displaySales(allSales);
+    } catch (err) {
+      console.error("Error loading sales:", err);
+      tbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger">❌ Failed to load sales: ${err.message}</td></tr>`;
+    }
+  }
+
+  // Display sales in table
+  function displaySales(sales) {
+    const tbody = document.getElementById('salesTableBody');
+    const noResults = document.getElementById('noResults');
+
+    if (sales.length === 0) {
+      tbody.innerHTML = '';
+      noResults.style.display = 'block';
+      return;
+    }
+
+    noResults.style.display = 'none';
+    tbody.innerHTML = sales.map(sale => {
+      const cashier = [sale.cashier_first_name, sale.cashier_last_name].filter(Boolean).join(' ') || 'Unknown';
+      return `
+        <tr>
+          <td>${sale.id}</td>
+          <td>${sale.student_name}</td>
+          <td>${sale.student_class}</td>
+          <td>₵${sale.total.toFixed(2)}</td>
+          <td>${cashier}</td>
+          <td>${sale.sale_date ? new Date(sale.sale_date).toLocaleDateString() : '—'}</td>
+          <td>${new Date(sale.created_at).toLocaleString()}</td>
+         <td>
+              <button class="btn btn-sm btn-success me-1" onclick="reprintReceipt(${sale.id})">
+                🖨️ Reprint
+              </button>
+              <button class="btn btn-sm btn-warning" onclick="reverseTransaction('${sale.id}')">
+                🔁 Reverse
+              </button>
+          </td>
+      `;
+    }).join('');
+  }
+
+  // Reprint receipt
+  function reprintReceipt(saleId) {
+    if (typeof window.reprintTransaction === 'function') {
+      window.reprintTransaction(saleId);
+    } else {
+      alert(`Reprint function not available. Sale ID: ${saleId}`);
+    }
+  }
+  
+
+  async function reverseTransaction(saleId) {
+  if (!confirm(`Are you sure you want to reverse this sale? This will restore all books to inventory.\n\nSale ID: ${saleId}`)) {
+    return;
+  }
+
+  const button = event.target;
+  button.disabled = true;
+  button.textContent = 'Processing...';
+
+  try {
+    // 1. Fetch the original sale
+    const { data: sale, error: saleError } = await supabase
+      .from('sales')
+      .select(`
+        id,
+        student_name,
+        student_class,
+        total,
+        created_at,
+        cashier_first_name,
+        cashier_last_name,
+        is_refund
+      `)
+      .eq('id', saleId)
+      .single();
+
+    if (saleError) throw new Error(`Failed to fetch sale: ${saleError.message}`);
+
+    // ✅ CRITICAL FIX: BLOCK REVERSING REFUNDS
+    if (sale.is_refund === true) {
+      alert('❌ This is already a refund. You cannot reverse a refund.');
+      return; // EARLY EXIT — NO FURTHER PROCESSING
+    }
+
+    // 2. Fetch all items in this sale — using YOUR schema (item_name, quantity)
+    const { data: saleItems, error: itemsError } = await supabase
+      .from('sale_items')
+      .select('item_name, quantity') 
+      .eq('sale_id', saleId);
+
+    if (itemsError) throw new Error(`Failed to fetch sale items: ${itemsError.message}`);
+
+    if (saleItems.length === 0) {
+      throw new Error('No items found for this sale.');
+    }
+
+    // 3. For each item, find matching book by title and restore stock
+    const restorePromises = saleItems.map(async item => {
+      const itemName = item.item_name.trim(); // Clean whitespace
+      const qtyToRestore = item.quantity;
+
+      if (!itemName || qtyToRestore <= 0) {
+        console.warn(`Skipping invalid item: "${itemName}" (${qtyToRestore})`);
+        return;
+      }
+
+      // Find the book by its title in the books table
+      const { data: book, error: bookError } = await supabase
+        .from('books')
+        .select('id, quantity')
+        .eq('title', itemName) //  MATCHES item_name to books.title
+        .single();
+
+      if (bookError) {
+        console.warn(`Book not found for item: "${itemName}"`, bookError.message);
+        return; // Skip if book doesn't exist — don’t break whole operation
+      }
+
+      if (!book || !book.id) {
+        console.warn(`No matching book found for item: "${itemName}"`);
+        return;
+      }
+
+      // Call the stored procedure to increment stock
+      const { error: rpcError } = await supabase.rpc('increment_book_stock', {
+        p_book_id: book.id,
+        p_increment_by: qtyToRestore
+      });
+
+      if (rpcError) {
+        console.error(`Failed to restore stock for "${itemName}":`, rpcError.message);
+        throw new Error(`Failed to restore stock for "${itemName}"`);
+      }
+
+      console.log(`✅ Restored ${qtyToRestore} copies of "${itemName}"`);
+    });
+
+    // Wait for ALL restores — even if some fail
+    const results = await Promise.allSettled(restorePromises);
+
+    // Check if any restore failed
+    const failed = results.filter(r => r.status === 'rejected');
+    if (failed.length > 0) {
+      throw new Error(`Some items could not be restored: ${failed.length} failures`);
+    }
+
+    // 4. Create a REFUND RECORD in sales table — FIXED SYNTAX!
+    const refundData = {
+      student_name: sale.student_name,
+      student_class: sale.student_class,
+      total: -Math.abs(sale.total),
+      sale_date: new Date().toISOString().split('T')[0],
+      created_at: new Date().toISOString(),
+      cashier_first_name: sale.cashier_first_name,
+      cashier_last_name: sale.cashier_last_name,
+      is_refund: true,
+      original_sale_id: sale.id
+    };
+
+    const { data: refund, error: refundError } = await supabase
+      .from('sales')
+      .insert([refundData])
+      .select()
+      .single();
+
+    if (refundError) throw new Error(` It has already been reversed.`);
+
+    // 5. Optional: Insert negative items into sale_items for audit trail
+    const negativeItems = saleItems.map(item => ({
+      sale_id: refund.id,
+      item_name: item.item_name,
+      quantity: -item.quantity, // Negative quantity
+      price: 0,
+      subtotal: 0
+    }));
+
+    if (negativeItems.length > 0) {
+      const { error: negItemsError } = await supabase
+        .from('sale_items')
+        .insert(negativeItems);
+
+      if (negItemsError) throw new Error(`Failed to insert negative items: ${negItemsError.message}`);
+    }
+
+    // ✅ SUCCESS!
+    alert(`✅ Transaction reversed successfully!\nStock restored and refund recorded.`);
+
+    // Refresh the table to show the new refund
+    loadSales();
+
+  } catch (err) {
+    console.error("❌ Reverse transaction failed:", err);
+    alert(`❌ Failed to reverse transaction: ${err.message}`);
+  } finally {
+    button.disabled = false;
+    button.textContent = '🔁 Reverse';
+  }
+}
+
+  // Filter sales
+  function filterSales() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+    if (!searchTerm) {
+      displaySales(allSales);
+      return;
+    }
+    const filtered = allSales.filter(sale => 
+      sale.id.toString().includes(searchTerm) ||
+      sale.student_name.toLowerCase().includes(searchTerm) ||
+      sale.student_class.toLowerCase().includes(searchTerm)
+    );
+    displaySales(filtered);
+  }
+
+
+  // Load sales on page load
+  document.addEventListener('DOMContentLoaded', loadSales);
+</script>
+</body>
+</html>

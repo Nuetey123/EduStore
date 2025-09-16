@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduStore | Admin Dashboard</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="../css/admin-dashboard.css">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="d-flex">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <h2 class="mb-4">EduStore Admin</h2>
+    <nav>
+      <a href="admin-dashboard.html" class="active">🏠 Dashboard</a>
+      <a href="inventory.html">📦 Inventory</a> <!-- Linked to inventory page -->
+      <a href="sales-viewer.html">💵 Sales</a>
+      <a href="register-cashier.html">🧑 Register Salesperson </a>
+      <a href="stock-viewer.html">📊 View Stocks</a>
+      <a href="#">⚙️ Settings</a>
+      <a href="#">🚪 Logout</a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="flex-grow-1">
+    <!-- Topbar -->
+    <header class="topbar">
+      <h1 class="h5 mb-0">Admin Dashboard</h1>
+    </header>
+
+    <div class="container-fluid p-3">
+      <!-- KPIs -->
+      <section class="row g-3 mb-3">
+        <div class="col-12 col-md-3">
+          <div class="card shadow-sm text-center p-3">
+            <h2 class="h6">📘 Total Books</h2>
+            <p class="fw-bold fs-4"> </p>
+          </div>
+        </div>
+        <div class="col-12 col-md-3">
+          <div class="card shadow-sm text-center p-3">
+            <h2 class="h6">💵 Total Sales</h2>
+            <p class="fw-bold fs-4"> </p>
+          </div>
+        </div>
+        <div class="col-12 col-md-3">
+          <div class="card shadow-sm text-center p-3">
+            <h2 class="h6">👩‍🎓 Students</h2>
+            <p class="fw-bold fs-4"> </p>
+          </div>
+        </div>
+        <div class="col-12 col-md-3">
+          <div class="card shadow-sm text-center p-3">
+            <h2 class="h6">🧑‍💼 Salespersons</h2>
+            <p class="fw-bold fs-4"> </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Reports -->
+      <section class="card shadow-sm p-3">
+        <h2 class="h5 mb-3">📊 Sales Overview</h2>
+        <canvas id="salesChart" height="100"></canvas>
+      </section>
+    </div>
+  </main>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  // Example Chart.js
+  const ctx = document.getElementById('salesChart');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+      datasets: [{
+        label: 'Sales (₵)',
+        data: [5000, 6500, 4000, 8000, 7000, 9000, 6000],
+        borderColor: '#0d6efd',
+        backgroundColor: 'rgba(13,110,253,0.2)',
+        fill: true,
+        tension: 0.3
+      }]
+    }
+  });
+</script>
+</body>
+</html>

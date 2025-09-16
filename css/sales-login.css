@@ -1,0 +1,17 @@
+/* Sales-specific styles (extends main.css) */
+.login-card {
+    border-top: 6px solid #059669; /* green for sales */
+  }
+  
+  h1 {
+    color: #065f46;
+  }
+  
+  button {
+    background: #059669;
+  }
+  
+  button:hover {
+    background: #047857;
+  }
+  

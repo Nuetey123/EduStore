@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Email Verified | EduStore</title>
+  <link rel="stylesheet" href="../css/main.css" />
+</head>
+<body>
+  <div class="verify-container">
+    <h1>Verifying your email...</h1>
+    <p>Please wait a moment.</p>
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const supabaseUrl = "https://uyqpvhcjsflogujbfheu.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5cXB2aGNqc2Zsb2d1amJmaGV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY5MTQ4NzQsImV4cCI6MjA3MjQ5MDg3NH0.Yn75_sNjk8-bZhvFRyGZML3rLWro0W4tsBXhdcE6aDA";
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Handle magic link / email confirmation
+    async function verifyEmail() {
+      const { data, error } = await supabase.auth.getSession();
+
+      if (error) {
+        document.body.innerHTML = `<h2>Error verifying email</h2><p>${error.message}</p>`;
+        return;
+      }
+
+      if (data.session) {
+        // Email verified ✅
+        document.body.innerHTML = `<h2>Email verified successfully ✅</h2><p>Redirecting to login...</p>`;
+        setTimeout(() => {
+          window.location.href = "sales-login.html";
+        }, 2000);
+      } else {
+        document.body.innerHTML = `<h2>Verification failed ❌</h2><p>No session found.</p>`;
+      }
+    }
+
+    verifyEmail();
+  </script>
+</body>
+</html>

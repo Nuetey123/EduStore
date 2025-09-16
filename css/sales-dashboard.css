@@ -1,0 +1,281 @@
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", sans-serif;
+  }
+  
+  body {
+    display: flex;
+    background: #f9fafb;
+    min-height: 100vh;
+  }
+  body {
+    font-family: 'Poppins', sans-serif;
+  }
+  /* ✅ Force proper text wrapping in low stock list */
+#lowStockList div {
+  white-space: normal !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  hyphens: auto;
+  text-align: center !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  margin: 0 auto !important;
+  max-width: 100% !important;
+  padding: 4px 8px !important;
+}
+  
+  /* Sidebar */
+  .sidebar {
+    background: #059669;
+    color: white;
+    width: 220px;
+    flex-shrink: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .sidebar .logo {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 2rem;
+  }
+  
+  .sidebar nav a {
+    display: block;
+    padding: 10px;
+    color: white;
+    text-decoration: none;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    transition: background 0.3s;
+  }
+  
+  .sidebar nav a:hover,
+  .sidebar nav a.active {
+    background: #047857;
+  }
+  
+  /* Main Content */
+  .main-content {
+    flex: 1;
+    padding: 20px;
+  }
+  
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  
+  .menu-toggle {
+    display: none;
+    font-size: 22px;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .stats .card {
+    flex: 1 1 200px; /* behaves like grid minmax */
+    min-width: 200px;
+  }
+  
+  
+  .card {
+    background: white;
+    padding: 1rem;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  
+  .card h2 {
+    font-size: 16px;
+    color: #374151;
+    margin-bottom: 10px;
+  }
+  
+  .card p {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: clamp(1rem, 2.5vw, 1.25rem); /* responsive size */
+  }
+  
+  .sales-amount {
+    font-size: clamp(1.2rem, 3vw, 2rem); /* responsive scaling */
+    white-space: nowrap; /* never break into two lines */
+  }
+  
+  .low-stock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-width: 200px;
+  }
+  
+  .low-stock h2 {
+    font-size: 16px;
+    color: #374151;
+    margin-bottom: 8px;
+  }
+  
+  .low-stock .low-stock-item {
+    font-size: 14px;
+    color: #dc2626;
+    font-weight: 500;
+    text-align: center;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow: hidden;
+    max-width: 180px;
+    padding: 4px 0;
+    margin: 0 auto;
+  }
+  
+  /* Optional: Add icon or bullet */
+  .low-stock .book::before {
+    content: "⚠️ ";
+    margin-right: 4px;
+  }
+
+  
+  /* Grid for sale form + transactions */
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  
+  /* Sale Form */
+  .sale-form {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  
+  .sale-form h2 {
+    margin-bottom: 15px;
+    color: #065f46;
+  }
+  
+  .sale-form label {
+    display: block;
+    font-weight: bold;
+    margin-top: 10px;
+  }
+  
+  .sale-form input, .sale-form select {
+    width: 100%;
+    padding: 0.7rem;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .sale-form button {
+    padding: 0.7rem 1rem;
+    background: #059669;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  
+  .sale-form button:hover {
+    background: #047857;
+  }
+  
+  /* Cart table */
+  #cartTable {
+    width: 100%;
+    margin-top: 10px;
+    border-collapse: collapse;
+  }
+  
+  #cartTable th, #cartTable td {
+    padding: 8px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: center;
+  }
+  
+  #cartTable th {
+    background: #f3f4f6;
+  }
+  
+  .total-box {
+    margin-top: 15px;
+    font-size: 18px;
+    text-align: right;
+  }
+  
+  /* Transactions Table */
+  .transactions {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  
+  .transactions table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .transactions th, .transactions td {
+    padding: 10px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+  }
+  
+  .transactions th {
+    background: #f3f4f6;
+    color: #374151;
+  }
+  
+  /* ✅ Mobile Responsive */
+  @media (max-width: 768px) {
+    body {
+      flex-direction: column;
+    }
+  
+    .sidebar {
+      position: absolute;
+      left: -240px;
+      top: 0;
+      bottom: 0;
+      transition: left 0.3s ease;
+      z-index: 1000;
+    }
+  
+    .sidebar.show {
+      left: 0;
+    }
+  
+    .menu-toggle {
+      display: block;
+      color: #059669;
+    }
+  
+    .content-grid {
+      grid-template-columns: 1fr; /* stack form + transactions */
+    }
+  }
+  

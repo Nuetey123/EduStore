@@ -1,0 +1,12 @@
+/* Admin-specific styles (extends main.css) */
+.login-card {
+  border-top: 6px solid #2563EB;
+}
+
+h1 {
+  color: #1f2937;
+}
+
+button {
+  background: #2563EB;
+}

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduStore | Login</title>
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #4e73df, #1cc88a);
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    .redirect-box {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 2rem 3rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      animation: fadeIn 1.5s ease-in-out;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    a {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background: #ffdf6c;
+      color: #333;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    a:hover {
+      background: #ffe899;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="redirect-box">
+    <h1>Welcome to EduStore 💼</h1>
+    <a href="./sales-login.html">Click here to Login</a>
+  </div>
+</body>
+</html>
