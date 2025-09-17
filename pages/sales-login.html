@@ -32,6 +32,7 @@
 
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script>
+    // 🔑 Supabase credentials
     const SUPABASE_URL = "https://uyqpvhcjsflogujbfheu.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5cXB2aGNqc2Zsb2d1amJmaGV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY5MTQ4NzQsImV4cCI6MjA3MjQ5MDg3NH0.Yn75_sNjk8-bZhvFRyGZML3rLWro0W4tsBXhdcE6aDA"; // ⚠️ replace with your anon key
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -60,10 +61,10 @@
 
         if (user.user_metadata.must_change_password) {
           // 🚀 First login → force change password
-          window.location.href = "http://localhost:5500/pages/sales-change-password.html";
+          window.location.href = "sales-change-password.html";
         } else {
           // 🚀 Normal login → go to dashboard
-          window.location.href = "http://localhost:5500/pages/sales-dashboard.html";
+          window.location.href = "sales-dashboard.html";
         }
       } catch (err) {
         console.error("Login failed:", err);
