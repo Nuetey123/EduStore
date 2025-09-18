@@ -9,7 +9,7 @@
 <body>
   <div class="verify-container">
     <h1>Verifying your email...</h1>
-    <p>Please wait a moment.</p>
+    <p id="status">Please wait a moment.</p>
   </div>
 
   <script type="module">
@@ -19,23 +19,37 @@
     const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5cXB2aGNqc2Zsb2d1amJmaGV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY5MTQ4NzQsImV4cCI6MjA3MjQ5MDg3NH0.Yn75_sNjk8-bZhvFRyGZML3rLWro0W4tsBXhdcE6aDA";
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Handle magic link / email confirmation
-    async function verifyEmail() {
-      const { data, error } = await supabase.auth.getSession();
+    const statusEl = document.getElementById("status");
 
-      if (error) {
-        document.body.innerHTML = `<h2>Error verifying email</h2><p>${error.message}</p>`;
+    async function verifyEmail() {
+      const params = new URLSearchParams(window.location.hash.substring(1));
+      const access_token = params.get("access_token");
+      const refresh_token = params.get("refresh_token");
+
+      if (!access_token) {
+        statusEl.textContent = "❌ Verification failed: No token found in URL.";
+        statusEl.style.color = "red";
         return;
       }
 
-      if (data.session) {
-        // Email verified ✅
-        document.body.innerHTML = `<h2>Email verified successfully ✅</h2><p>Redirecting to login...</p>`;
+      try {
+        const { data, error } = await supabase.auth.setSession({
+          access_token,
+          refresh_token,
+        });
+
+        if (error) throw error;
+
+        statusEl.textContent = "✅ Email verified successfully! Redirecting...";
+        statusEl.style.color = "green";
+
         setTimeout(() => {
           window.location.href = "sales-login.html";
         }, 2000);
-      } else {
-        document.body.innerHTML = `<h2>Verification failed ❌</h2><p>No session found.</p>`;
+      } catch (err) {
+        console.error("Verification error:", err);
+        statusEl.textContent = "❌ Verification failed.";
+        statusEl.style.color = "red";
       }
     }
 
