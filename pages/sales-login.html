@@ -16,10 +16,10 @@
 
       <form id="loginForm">
         <label for="email">Email</label>
-        <input type="email" id="email" placeholder="sales@gmail.com" required />
+        <input type="email" id="email" placeholder="Email" required />
 
         <label for="password">Password</label>
-        <input type="password" id="password" placeholder="••••••••" required />
+        <input type="password" id="password" placeholder="password" required />
 
         <button type="submit">Login</button>
       </form>
@@ -31,47 +31,47 @@
   </div>
 
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script>
-    // 🔑 Supabase credentials
-    const SUPABASE_URL = "https://uyqpvhcjsflogujbfheu.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5cXB2aGNqc2Zsb2d1amJmaGV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY5MTQ4NzQsImV4cCI6MjA3MjQ5MDg3NH0.Yn75_sNjk8-bZhvFRyGZML3rLWro0W4tsBXhdcE6aDA"; // ⚠️ replace with your anon key
-    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+<script>
+  const SUPABASE_URL = "https://uyqpvhcjsflogujbfheu.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5cXB2aGNqc2Zsb2d1amJmaGV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY5MTQ4NzQsImV4cCI6MjA3MjQ5MDg3NH0.Yn75_sNjk8-bZhvFRyGZML3rLWro0W4tsBXhdcE6aDA"; // ⚠️ keep it safe
+  const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const form = document.getElementById("loginForm");
-    const statusEl = document.getElementById("statusMessage");
+  const form = document.getElementById("loginForm");
+  const statusEl = document.getElementById("statusMessage");
 
-    form.addEventListener("submit", async function (e) {
-      e.preventDefault();
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
 
-      statusEl.textContent = "Logging in...";
-      statusEl.style.color = "blue";
+    statusEl.textContent = "Logging in...";
+    statusEl.style.color = "blue";
 
-      try {
-        const { data, error } = await client.auth.signInWithPassword({
-          email,
-          password,
-        });
+    try {
+      const { data, error } = await client.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-        if (error) throw error;
+      if (error) throw error;
 
-        const user = data.user;
+      const user = data.user;
 
-        if (user.user_metadata.must_change_password) {
-          // 🚀 First login → force change password
-          window.location.href = "sales-change-password.html";
-        } else {
-          // 🚀 Normal login → go to dashboard
-          window.location.href = "sales-dashboard.html";
-        }
-      } catch (err) {
-        console.error("Login failed:", err);
-        statusEl.textContent = "❌ Invalid email or password.";
-        statusEl.style.color = "red";
+      if (user?.user_metadata?.must_change_password) {
+        // First-time login → redirect to change password
+        window.location.href = "sales-change-password.html";
+      } else {
+        // Normal login → go to dashboard
+        window.location.href = "sales-dashboard.html";
       }
-    });
-  </script>
+    } catch (err) {
+      console.error("Login failed:", err);
+      statusEl.textContent = "❌ Invalid email or password.";
+      statusEl.style.color = "red";
+    }
+  });
+</script>
+
 </body>
 </html>
