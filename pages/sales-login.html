@@ -65,6 +65,14 @@
 }
 
   });
+
+  // Prevent back button from returning to dashboard after logout
+if (window.history.length > 1) {
+  window.history.pushState(null, null, window.location.href);
+  window.addEventListener('popstate', () => {
+    window.history.pushState(null, null, window.location.href);
+  });
+}
 </script>
 
 </body>

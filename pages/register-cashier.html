@@ -51,7 +51,7 @@
       for (let i = 0; i < length; i++) {
         password += charset[Math.floor(Math.random() * charset.length)];
       }
-      return password + "!"; // append special char
+      return password; // append special char
     }
 
     const form = document.getElementById('cashierForm');

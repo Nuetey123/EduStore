@@ -26,7 +26,7 @@
         <a href="#">➕ New Sale</a>
         <a href="#">🧾 Transactions</a>
         <a href="#">👤 Profile</a>
-        <a href="#">🚪 Logout</a>
+        <a href="#" id="logoutBtn">🚪 Logout</a>
       </nav>
     </aside>
 
@@ -36,6 +36,7 @@
       <header class="topbar">
         <button class="menu-toggle">☰</button>
         <h1 class="h5 mb-0">Sales Dashboard</h1>
+        <span id="currentUser" class="ms-3 text-muted small">Loading...</span>
       </header>
 
       <div class="container-fluid p-3">
@@ -180,6 +181,13 @@
     const SUPABASE_URL = "https://uyqpvhcjsflogujbfheu.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5cXB2aGNqc2Zsb2d1amJmaGV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY5MTQ4NzQsImV4cCI6MjA3MjQ5MDg3NH0.Yn75_sNjk8-bZhvFRyGZML3rLWro0W4tsBXhdcE6aDA";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ----------------- Auto-redirect if not logged in -----------------
+supabase.auth.onAuthStateChange(async (event, session) => {
+  if (event === "SIGNED_OUT") {
+    window.location.href = "sales-login.html";
+  }
+});
 
 // ----------------- Force Password Change Modal -----------------
 const modal = document.getElementById("passwordModal");
@@ -927,6 +935,50 @@ window.addEventListener("keydown", (e) => {
 // Prevent closing by clicking outside
 modal.addEventListener("click", (e) => {
   if (e.target === modal) e.stopPropagation();
+});
+// ----------------- Logout Functionality -----------------
+document.getElementById("logoutBtn").addEventListener("click", async (e) => {
+  e.preventDefault(); // Prevent default anchor behavior
+
+  // Show confirmation
+  if (!confirm("Are you sure you want to log out?")) {
+    return;
+  }
+
+  const statusEl = document.createElement("div");
+  statusEl.className = "alert alert-info fixed-top text-center m-0 rounded-0";
+  statusEl.textContent = "Signing out...";
+  document.body.appendChild(statusEl);
+
+  try {
+    const { error } = await supabase.auth.signOut();
+    
+    if (error) {
+      throw error;
+    }
+
+    // Clear any cached data
+    localStorage.removeItem("lastUsedBookId"); // if you use any
+    sessionStorage.clear();
+
+    // Redirect to login
+    window.location.href = "sales-login.html";
+
+  } catch (err) {
+    console.error("Logout failed:", err);
+    statusEl.className = "alert alert-danger fixed-top text-center m-0 rounded-0";
+    statusEl.textContent = "❌ Failed to sign out. Try again.";
+    setTimeout(() => {
+      document.body.removeChild(statusEl);
+    }, 3000);
+  } finally {
+    // Hide status message after 2 seconds
+    setTimeout(() => {
+      if (statusEl.parentNode) {
+        document.body.removeChild(statusEl);
+      }
+    }, 2000);
+  }
 });
 
 </script>   
