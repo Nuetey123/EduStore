@@ -219,6 +219,22 @@
   #cartTable th {
     background: #f3f4f6;
   }
+
+  .topbar {
+    padding: 0.75rem 1rem;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    z-index: 1000;
+  }
+  
+  .topbar .menu-toggle {
+    margin-right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #333;
+  }
   
   .total-box {
     margin-top: 15px;

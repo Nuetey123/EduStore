@@ -33,10 +33,12 @@
     <!-- Main Content -->
     <main class="flex-grow-1">
       <!-- Topbar -->
-      <header class="topbar">
-        <button class="menu-toggle">☰</button>
-        <h1 class="h5 mb-0">Sales Dashboard</h1>
-        <span id="currentUser" class="ms-3 text-muted small">Loading...</span>
+      <header class="topbar d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+          <button class="menu-toggle">☰</button>
+          <h1 class="h5 mb-0 ms-2">Sales Dashboard</h1>
+        </div>
+        <span id="currentUser" class="text-muted small ms-3">Loading...</span>
       </header>
 
       <div class="container-fluid p-3">
@@ -204,6 +206,68 @@ async function checkUser() {
 
 // ✅ Call checkUser when page loads
 checkUser();
+
+async function updateCurrentUserDisplay() {
+  const { data: { user } } = await supabase.auth.getUser();
+  const userEl = document.getElementById("currentUser");
+
+  if (user) {
+    const name = user.user_metadata?.full_name || user.email.split('@')[0];
+    userEl.textContent = `Logged in as: ${name}`;
+    userEl.style.display = "inline";
+  } else {
+    userEl.textContent = "Not logged in";
+    userEl.style.display = "inline";
+    // Optional: Redirect if not logged in
+    window.location.href = "sales-login.html";
+  }
+}
+
+// Call it on load
+updateCurrentUserDisplay();
+
+// And also on auth change
+// ----------------- Initialize Auth and User Display -----------------
+let isAuthInitialized = false;
+
+async function initializeAuth() {
+  // Wait for Supabase to restore session from localStorage
+  const { data: { session } } = await supabase.auth.getSession();
+
+  // Now we know the real auth state
+  isAuthInitialized = true;
+  updateCurrentUserDisplay();
+
+  // Now listen for future changes
+  supabase.auth.onAuthStateChange(async (event, session) => {
+    if (event === "SIGNED_OUT") {
+      window.location.href = "sales-login.html";
+    }
+    updateCurrentUserDisplay(); // Always update UI on auth change
+  });
+}
+
+// Call this once on page load
+initializeAuth();
+
+// Function to update the logged-in user display
+async function updateCurrentUserDisplay() {
+  if (!isAuthInitialized) return; // Don't redirect until initialized
+
+  const { data: { user } } = await supabase.auth.getUser();
+  const userEl = document.getElementById("currentUser");
+
+  if (user) {
+    const name = user.user_metadata?.full_name || user.email.split('@')[0];
+    userEl.textContent = `Logged in as: ${name}`;
+    userEl.style.display = "inline";
+  } else {
+    userEl.textContent = "Not logged in";
+    userEl.style.display = "inline";
+    // Only redirect if we're sure auth is initialized
+    window.location.href = "sales-login.html";
+  }
+}
 
 // ✅ Handle password change
 changeBtn.addEventListener("click", async () => {
@@ -913,7 +977,7 @@ function displayTransactions(transactions) {
 loadRecentTransactions();
 
 
-// Listen for new sales
+
 // Listen for new sales
 const newSalesChannel = supabase
   .channel('new-sales-realtime')
@@ -922,7 +986,7 @@ const newSalesChannel = supabase
     { event: 'INSERT', schema: 'public', table: 'sales' },
     () => {
       loadRecentTransactions();
-      loadDashboardStats(); // 👈 optional: refresh stats as well
+      loadDashboardStats();
     }
   )
   .subscribe();
