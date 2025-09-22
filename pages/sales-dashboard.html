@@ -181,6 +181,53 @@
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5cXB2aGNqc2Zsb2d1amJmaGV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY5MTQ4NzQsImV4cCI6MjA3MjQ5MDg3NH0.Yn75_sNjk8-bZhvFRyGZML3rLWro0W4tsBXhdcE6aDA";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// ----------------- Force Password Change Modal -----------------
+const modal = document.getElementById("passwordModal");
+const changeBtn = document.getElementById("changePasswordBtn");
+const statusEl = document.getElementById("statusMessage");
+
+// ✅ Check user after login — USE supabase, NOT client!
+async function checkUser() {
+  const { data: { user } } = await supabase.auth.getUser(); // ✅ FIXED: supabase, not client
+  if (user?.user_metadata?.must_change_password) {
+    modal.style.display = "flex"; // 🔹 Show popup
+  }
+}
+
+// ✅ Call checkUser when page loads
+checkUser();
+
+// ✅ Handle password change
+changeBtn.addEventListener("click", async () => {
+  const newPassword = document.getElementById("newPassword").value;
+  const confirmPassword = document.getElementById("confirmPassword").value;
+
+  if (newPassword !== confirmPassword) {
+    statusEl.textContent = "❌ Passwords do not match!";
+    statusEl.style.color = "red";
+    return;
+  }
+
+  changeBtn.disabled = true;
+  statusEl.textContent = "Updating password...";
+  statusEl.style.color = "blue";
+
+  const { error } = await supabase.auth.updateUser({
+    password: newPassword,
+    data: { must_change_password: false } // ✅ Update metadata to prevent loop
+  });
+
+  if (error) {
+    statusEl.textContent = "❌ " + error.message;
+    statusEl.style.color = "red";
+    changeBtn.disabled = false;
+  } else {
+    statusEl.textContent = "✅ Password updated! Reloading...";
+    statusEl.style.color = "green";
+    setTimeout(() => window.location.reload(), 1500);
+  }
+});
+
 // ----------------- Sidebar Toggle -----------------
 const menuBtn = document.querySelector(".menu-toggle");
 const sidebar = document.querySelector(".sidebar");
@@ -347,7 +394,7 @@ saleForm.addEventListener("submit", async (e) => {
 
   // Insert sale
   const { data: saleData, error: saleError } = await supabase.from("sales")
-    .insert([{ student_name: studentName, student_class: studentClass, total: totalAmount,   sale_date: new Date().toISOString(), }])
+    .insert([{ student_name: studentName, student_class: studentClass, total: totalAmount }])
     .select();
   if (saleError) return alert("Error saving sale!");
 
@@ -872,7 +919,28 @@ const newSalesChannel = supabase
   )
   .subscribe();
 
+// Prevent closing with ESC
+window.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") e.preventDefault();
+});
 
-</script>    
+// Prevent closing by clicking outside
+modal.addEventListener("click", (e) => {
+  if (e.target === modal) e.stopPropagation();
+});
+
+</script>   
+<!-- Force Password Change Modal -->
+<div id="passwordModal" class="modal">
+  <div class="modal-content">
+    <h2>Change Your Password</h2>
+    <p>You must change your password before continuing.</p>
+    <input type="password" id="newPassword" placeholder="New Password" required />
+    <input type="password" id="confirmPassword" placeholder="Confirm Password" required />
+    <button id="changePasswordBtn">Change Password</button>
+    <div id="statusMessage"></div>
+  </div>
+</div>
+
 </body>
 </html>

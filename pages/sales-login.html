@@ -49,27 +49,21 @@
     statusEl.style.color = "blue";
 
     try {
-      const { data, error } = await client.auth.signInWithPassword({
-        email,
-        password,
-      });
+  const { data, error } = await client.auth.signInWithPassword({
+    email,
+    password,
+  });
 
-      if (error) throw error;
+  if (error) throw error;
 
-      const user = data.user;
+  // Always go to dashboard after login
+  window.location.href = "sales-dashboard.html";
+} catch (err) {
+  console.error("Login failed:", err);
+  statusEl.textContent = "❌ Invalid email or password.";
+  statusEl.style.color = "red";
+}
 
-      if (user?.user_metadata?.must_change_password) {
-        // First-time login → redirect to change password
-        window.location.href = "sales-change-password.html";
-      } else {
-        // Normal login → go to dashboard
-        window.location.href = "sales-dashboard.html";
-      }
-    } catch (err) {
-      console.error("Login failed:", err);
-      statusEl.textContent = "❌ Invalid email or password.";
-      statusEl.style.color = "red";
-    }
   });
 </script>
 
