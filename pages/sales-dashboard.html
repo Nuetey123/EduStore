@@ -192,9 +192,6 @@ supabase.auth.onAuthStateChange(async (event, session) => {
 });
 
 // ----------------- Force Password Change Modal -----------------
-const modal = document.getElementById("passwordModal");
-const changeBtn = document.getElementById("changePasswordBtn");
-const statusEl = document.getElementById("statusMessage");
 
 // ✅ Check user after login — USE supabase, NOT client!
 async function checkUser() {
@@ -228,26 +225,36 @@ updateCurrentUserDisplay();
 
 // And also on auth change
 // ----------------- Initialize Auth and User Display -----------------
-let isAuthInitialized = false;
 
 async function initializeAuth() {
-  // Wait for Supabase to restore session from localStorage
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session }, error } = await supabase.auth.getSession();
 
-  // Now we know the real auth state
   isAuthInitialized = true;
   updateCurrentUserDisplay();
 
-  // Now listen for future changes
+  // ✅ Also check on initial load (if already logged in)
+  if (session) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user && user.user_metadata?.must_change_password) {
+      window.location.href = 'sales-change-password.html';
+      return; // stop further execution
+    }
+  }
+
+  // ✅ Updated auth state listener
   supabase.auth.onAuthStateChange(async (event, session) => {
     if (event === "SIGNED_OUT") {
       window.location.href = "sales-login.html";
+    } else if (event === "SIGNED_IN" && session) {
+      updateCurrentUserDisplay();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user && user.user_metadata?.must_change_password) {
+        window.location.href = 'sales-change-password.html';
+      }
     }
-    updateCurrentUserDisplay(); // Always update UI on auth change
   });
 }
 
-// Call this once on page load
 initializeAuth();
 
 // Function to update the logged-in user display
@@ -269,36 +276,6 @@ async function updateCurrentUserDisplay() {
   }
 }
 
-// ✅ Handle password change
-changeBtn.addEventListener("click", async () => {
-  const newPassword = document.getElementById("newPassword").value;
-  const confirmPassword = document.getElementById("confirmPassword").value;
-
-  if (newPassword !== confirmPassword) {
-    statusEl.textContent = "❌ Passwords do not match!";
-    statusEl.style.color = "red";
-    return;
-  }
-
-  changeBtn.disabled = true;
-  statusEl.textContent = "Updating password...";
-  statusEl.style.color = "blue";
-
-  const { error } = await supabase.auth.updateUser({
-    password: newPassword,
-    data: { must_change_password: false } // ✅ Update metadata to prevent loop
-  });
-
-  if (error) {
-    statusEl.textContent = "❌ " + error.message;
-    statusEl.style.color = "red";
-    changeBtn.disabled = false;
-  } else {
-    statusEl.textContent = "✅ Password updated! Reloading...";
-    statusEl.style.color = "green";
-    setTimeout(() => window.location.reload(), 1500);
-  }
-});
 
 // ----------------- Sidebar Toggle -----------------
 const menuBtn = document.querySelector(".menu-toggle");
@@ -1045,18 +1022,16 @@ document.getElementById("logoutBtn").addEventListener("click", async (e) => {
   }
 });
 
-</script>   
-<!-- Force Password Change Modal -->
-<div id="passwordModal" class="modal">
-  <div class="modal-content">
-    <h2>Change Your Password</h2>
-    <p>You must change your password before continuing.</p>
-    <input type="password" id="newPassword" placeholder="New Password" required />
-    <input type="password" id="confirmPassword" placeholder="Confirm Password" required />
-    <button id="changePasswordBtn">Change Password</button>
-    <div id="statusMessage"></div>
-  </div>
-</div>
+document.getElementById("studentSearch").addEventListener("input", function() {
+  const query = this.value.toLowerCase();
+  const rows = document.querySelectorAll("#transactionTable tr");
+  rows.forEach(row => {
+    const student = row.cells[0]?.textContent.toLowerCase();
+    row.style.display = student && student.includes(query) ? "" : "none";
+  });
+});
+
+</script>
 
 </body>
 </html>
