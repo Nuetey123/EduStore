@@ -80,19 +80,12 @@
         if (role === 'admin') {
           window.location.href = 'admin-dashboard.html';
         } else if (role === 'cashier') {
-          if (mustChangePassword) {
-            // make sure change-password page uses the active session (see note below)
-            window.location.href = 'change-password.html';
-          } else {
-            window.location.href = 'sales-dashboard.html';
-          }
+          window.location.href = 'sales-dashboard.html';
         } else {
-          // fallback: either no role or unknown role
           statusEl.textContent = "❌ Unauthorized role. Contact administrator.";
           statusEl.style.color = "red";
-          // sign out to clear any session
           await client.auth.signOut();
-        }
+}
 
       } catch (err) {
         console.error("Login failed:", err);
