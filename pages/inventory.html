@@ -210,7 +210,6 @@
   tableBody.appendChild(row);
 }
 
-  // ✅ Add new book
  // ✅ Add new book
  form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -222,6 +221,17 @@
 
   // Insert new book
   // ✅ Insert new book — WITH initial_stock and total_restocked
+
+  console.log({
+  title,
+  cost,
+  selling,
+  quantity,
+  initial_stock: quantity,
+  total_restocked: 0,
+  total_returned: 0
+});
+
 const { error } = await supabase
   .from("books")
   .insert([
@@ -230,10 +240,12 @@ const { error } = await supabase
       cost_price: cost, 
       selling_price: selling, 
       quantity,
-      initial_stock: quantity,      // 👈 SET initial_stock = quantity
-      total_restocked: 0            // 👈 SET total_restocked = 0
+      initial_stock: quantity,
+      total_restocked: 0,
+      total_returned: 0
     }
   ]);
+
 
   if (error) {
     showToast("❌ Add failed: " + error.message, "danger");
