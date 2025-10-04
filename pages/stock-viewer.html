@@ -166,6 +166,46 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
       tbody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">❌ Failed to load stock data: ${err.message}</td></tr>`;
     }
   }
+
+  // ----------------- Logout Functionality -----------------
+  document.getElementById("logoutBtn").addEventListener("click", async (e) => {
+    e.preventDefault();
+
+    if (!confirm("Are you sure you want to log out?")) {
+      return;
+    }
+
+    const statusEl = document.createElement("div");
+    statusEl.className = "alert alert-info fixed-top text-center m-0 rounded-0";
+    statusEl.textContent = "Signing out...";
+    document.body.appendChild(statusEl);
+
+    try {
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        throw error;
+      }
+
+      localStorage.removeItem("lastUsedBookId");
+      sessionStorage.clear();
+      window.location.href = "sales-login.html";
+
+    } catch (err) {
+      console.error("Logout failed:", err);
+      statusEl.className = "alert alert-danger fixed-top text-center m-0 rounded-0";
+      statusEl.textContent = "❌ Failed to sign out. Try again.";
+      setTimeout(() => {
+        document.body.removeChild(statusEl);
+      }, 3000);
+    } finally {
+      setTimeout(() => {
+        if (statusEl.parentNode) {
+          document.body.removeChild(statusEl);
+        }
+      }, 2000);
+    }
+  });
 </script>
 </body>
 </html>
