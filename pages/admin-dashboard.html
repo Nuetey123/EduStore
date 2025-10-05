@@ -24,12 +24,13 @@
     <h2 class="mb-4">EduStore Admin</h2>
     <nav>
       <a href="admin-dashboard.html" class="active">🏠 Dashboard</a>
-      <a href="inventory.html">📦 Inventory</a> <!-- Linked to inventory page -->
+      <a href="inventory.html">📦 Inventory</a>
       <a href="sales-viewer.html">💵 Sales</a>
-      <a href="register-cashier.html">🧑 Register Salesperson </a>
+      <a href="register-cashier.html">🧑 Register Cashier</a>
       <a href="stock-viewer.html">📊 View Stocks</a>
+      <a href="cashier-management.html">🧑 Cashier Management</a>
       <a href="#">⚙️ Settings</a>
-       <a href="#" id="logoutBtn">🚪 Logout</a>
+      <a href="#" id="logoutBtn">🚪 Logout</a>
     </nav>
   </aside>
 
@@ -46,25 +47,25 @@
         <div class="col-12 col-md-3">
           <div class="card shadow-sm text-center p-3">
             <h2 class="h6">📘 Total Books</h2>
-            <p class="fw-bold fs-4"> </p>
+            <p id="totalBooks" class="fw-bold fs-4">Loading...</p>
           </div>
         </div>
         <div class="col-12 col-md-3">
           <div class="card shadow-sm text-center p-3">
             <h2 class="h6">💵 Total Sales</h2>
-            <p class="fw-bold fs-4"> </p>
+            <p id="totalSales" class="fw-bold fs-4">Loading...</p>
           </div>
         </div>
         <div class="col-12 col-md-3">
           <div class="card shadow-sm text-center p-3">
             <h2 class="h6">👩‍🎓 Students</h2>
-            <p class="fw-bold fs-4"> </p>
+            <p id="totalStudents" class="fw-bold fs-4">Loading...</p>
           </div>
         </div>
         <div class="col-12 col-md-3">
           <div class="card shadow-sm text-center p-3">
             <h2 class="h6">🧑‍💼 Salespersons</h2>
-            <p class="fw-bold fs-4"> </p>
+            <p id="totalCashiers" class="fw-bold fs-4">Loading...</p>
           </div>
         </div>
       </section>
@@ -81,62 +82,251 @@
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<script>
-  // Example Chart.js
-  const ctx = document.getElementById('salesChart');
-  new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
-      datasets: [{
-        label: 'Sales (₵)',
-        data: [5000, 6500, 4000, 8000, 7000, 9000, 6000],
-        borderColor: '#0d6efd',
-        backgroundColor: 'rgba(13,110,253,0.2)',
-        fill: true,
-        tension: 0.3
-      }]
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+  const SUPABASE_URL = "https://uyqpvhcjsflogujbfheu.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5cXB2aGNqc2Zsb2d1amJmaGV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY5MTQ4NzQsImV4cCI6MjA3MjQ5MDg3NH0.Yn75_sNjk8-bZhvFRyGZML3rLWro0W4tsBXhdcE6aDA";
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // ----------------- Check Authentication First -----------------
+  async function checkAuth() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      window.location.href = "sales-login.html";
+      return false;
     }
-  });
-  // ----------------- Logout Functionality -----------------
-  document.getElementById("logoutBtn").addEventListener("click", async (e) => {
-    e.preventDefault();
+    return true;
+  }
 
-    if (!confirm("Are you sure you want to log out?")) {
-      return;
-    }
-
-    const statusEl = document.createElement("div");
-    statusEl.className = "alert alert-info fixed-top text-center m-0 rounded-0";
-    statusEl.textContent = "Signing out...";
-    document.body.appendChild(statusEl);
-
+  // ----------------- Load Dashboard Stats -----------------
+  async function loadDashboardStats() {
     try {
-      const { error } = await supabase.auth.signOut();
+      console.log("Loading dashboard stats...");
       
-      if (error) {
-        throw error;
+      // 1. Total Books
+      const booksResponse = await supabase
+        .from('books')
+        .select('*', { count: 'exact', head: true });
+      
+      if (booksResponse.error) {
+        console.error('Books error:', booksResponse.error);
+        document.getElementById('totalBooks').textContent = 'Error';
+      } else {
+        document.getElementById('totalBooks').textContent = booksResponse.count || 0;
       }
 
-      localStorage.removeItem("lastUsedBookId");
-      sessionStorage.clear();
-      window.location.href = "sales-login.html";
+      // 2. Total Sales
+      const salesResponse = await supabase
+        .from('sales')
+        .select('total');
+      
+      if (salesResponse.error) {
+        console.error('Sales error:', salesResponse.error);
+        document.getElementById('totalSales').textContent = 'Error';
+      } else {
+        const totalSales = salesResponse.data.reduce((sum, sale) => sum + (sale.total || 0), 0);
+        document.getElementById('totalSales').textContent = `₵${totalSales.toFixed(2)}`;
+      }
+
+      // 3. Total Unique Students
+      const studentsResponse = await supabase
+        .from('sales')
+        .select('student_name');
+      
+      if (studentsResponse.error) {
+        console.error('Students error:', studentsResponse.error);
+        document.getElementById('totalStudents').textContent = 'Error';
+      } else {
+        const uniqueStudents = new Set(studentsResponse.data.map(s => s.student_name)).size;
+        document.getElementById('totalStudents').textContent = uniqueStudents;
+      }
+
+      // 4. Total Cashiers
+      const cashiersResponse = await supabase
+        .from('cashiers')
+        .select('*', { count: 'exact', head: true });
+      
+      if (cashiersResponse.error) {
+        console.error('Cashiers error:', cashiersResponse.error);
+        document.getElementById('totalCashiers').textContent = 'Error';
+      } else {
+        document.getElementById('totalCashiers').textContent = cashiersResponse.count || 0;
+      }
 
     } catch (err) {
-      console.error("Logout failed:", err);
-      statusEl.className = "alert alert-danger fixed-top text-center m-0 rounded-0";
-      statusEl.textContent = "❌ Failed to sign out. Try again.";
-      setTimeout(() => {
-        document.body.removeChild(statusEl);
-      }, 3000);
-    } finally {
-      setTimeout(() => {
-        if (statusEl.parentNode) {
-          document.body.removeChild(statusEl);
-        }
-      }, 2000);
+      console.error('Error loading dashboard stats:', err);
+      document.getElementById('totalBooks').textContent = 'Error';
+      document.getElementById('totalSales').textContent = 'Error';
+      document.getElementById('totalStudents').textContent = 'Error';
+      document.getElementById('totalCashiers').textContent = 'Error';
     }
-  });
+  }
+
+  // ----------------- Load Sales Chart Data -----------------
+  async function loadSalesChart() {
+    try {
+      console.log("Loading sales chart...");
+      
+      const today = new Date();
+      const lastWeek = new Date();
+      lastWeek.setDate(today.getDate() - 6);
+      
+      const salesResponse = await supabase
+        .from('sales')
+        .select('created_at, total')
+        .gte('created_at', lastWeek.toISOString().split('T')[0])
+        .lte('created_at', today.toISOString().split('T')[0])
+        .order('created_at', { ascending: true });
+
+      if (salesResponse.error) {
+        console.error('Chart error:', salesResponse.error);
+        return;
+      }
+
+      const sales = salesResponse.data;
+      
+      // Initialize data for last 7 days
+      const labels = [];
+      const data = [];
+      const dailyTotals = {};
+
+      // Create date range for last 7 days
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(today.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+        labels.push(date.toLocaleDateString('en-US', { weekday: 'short' }));
+        dailyTotals[dateStr] = 0;
+      }
+
+      // Sum sales by date
+      sales.forEach(sale => {
+        const saleDate = sale.created_at.split('T')[0];
+        if (dailyTotals[saleDate] !== undefined) {
+          dailyTotals[saleDate] += sale.total || 0;
+        }
+      });
+
+      // Fill data array
+      Object.values(dailyTotals).forEach(total => {
+        data.push(parseFloat(total.toFixed(2)));
+      });
+
+      // Create chart
+      const ctx = document.getElementById('salesChart').getContext('2d');
+      
+      // Destroy existing chart if it exists
+      if (window.salesChartInstance) {
+        window.salesChartInstance.destroy();
+      }
+
+      window.salesChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Sales (₵)',
+            data: data,
+            borderColor: '#0d6efd',
+            backgroundColor: 'rgba(13,110,253,0.2)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 4,
+            pointBackgroundColor: '#0d6efd'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top'
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return '₵' + value;
+                }
+              }
+            }
+          }
+        }
+      });
+
+    } catch (err) {
+      console.error('Error loading sales chart:', err);
+    }
+  }
+
+  // ----------------- Logout Functionality -----------------
+  async function setupLogout() {
+    document.getElementById("logoutBtn").addEventListener("click", async (e) => {
+      e.preventDefault();
+
+      if (!confirm("Are you sure you want to log out?")) {
+        return;
+      }
+
+      const statusEl = document.createElement("div");
+      statusEl.className = "alert alert-info fixed-top text-center m-0 rounded-0";
+      statusEl.textContent = "Signing out...";
+      document.body.appendChild(statusEl);
+
+      try {
+        const { error } = await supabase.auth.signOut();
+        
+        if (error) {
+          throw error;
+        }
+
+        localStorage.removeItem("lastUsedBookId");
+        sessionStorage.clear();
+        window.location.href = "sales-login.html";
+
+      } catch (err) {
+        console.error("Logout failed:", err);
+        statusEl.className = "alert alert-danger fixed-top text-center m-0 rounded-0";
+        statusEl.textContent = "❌ Failed to sign out. Try again.";
+        setTimeout(() => {
+          document.body.removeChild(statusEl);
+        }, 3000);
+      } finally {
+        setTimeout(() => {
+          if (statusEl.parentNode) {
+            document.body.removeChild(statusEl);
+          }
+        }, 2000);
+      }
+    });
+  }
+
+  // ----------------- Initialize Dashboard -----------------
+  async function initDashboard() {
+    // Check if user is authenticated
+    const isAuthenticated = await checkAuth();
+    if (!isAuthenticated) return;
+
+    // Setup logout button
+    setupLogout();
+
+    // Load data
+    await loadDashboardStats();
+    await loadSalesChart();
+
+    // Refresh every 30 seconds
+    setInterval(async () => {
+      await loadDashboardStats();
+      await loadSalesChart();
+    }, 30000);
+  }
+
+  // Start the dashboard
+  initDashboard();
 </script>
 </body>
 </html>
