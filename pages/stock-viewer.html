@@ -13,9 +13,15 @@
     .stat-box { background: #e9ecef; padding: 10px 15px; border-radius: 5px; text-align: center; }
     .stat-value { font-size: 1.5em; font-weight: bold; color: #495057; }
     .low-stock { color: #e74c3c; font-weight: 600; }
+    @media (max-width: 768px) {
+  .sidebar { position: relative; height: auto; }
+  main { margin-left: 0; }
+}
+
   </style>
 </head>
 <body>
+
 <div class="d-flex">
   <!-- Sidebar -->
   <aside class="sidebar">
@@ -28,6 +34,7 @@
        <a href="#" id="logoutBtn">🚪 Logout</a>
     </nav>
   </aside>
+<button class="btn btn-outline-secondary d-md-none mb-3" id="toggleSidebar">☰ Menu</button>
 
   <!-- Main Content -->
   <main class="flex-grow-1">
@@ -66,9 +73,14 @@
     </div>
   </main>
 </div>
-
+<!-- Toast Notification (add this before the closing body tag) -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+  <div id="toastMsg" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-body"></div>
+  </div>
+</div>
 <!-- Supabase & App JS -->
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script  type="module">
 
@@ -115,57 +127,100 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
     const totalCurrent = books.reduce((sum, b) => sum + b.quantity, 0);
     const totalSold = totalInitial + totalRestocked - totalReturned - totalCurrent;
 
-    container.innerHTML = `
-      <div class="col-md-2 stat-box">
-        <div>Total Titles</div>
-        <div class="stat-value">${totalTitles}</div>
+   container.innerHTML = `
+  <div class="col-md-2 mb-3">
+    <div class="card text-center border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="text-muted">Total Titles</h6>
+        <h4 class="fw-bold">${totalTitles}</h4>
       </div>
-      <div class="col-md-2 stat-box">
-        <div>Initial Stock</div>
-        <div class="stat-value">${totalInitial}</div>
+    </div>
+  </div>
+  <div class="col-md-2 mb-3">
+    <div class="card text-center border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="text-muted">Initial Stock</h6>
+        <h4 class="fw-bold">${totalInitial}</h4>
       </div>
-      <div class="col-md-2 stat-box">
-        <div>Restocked</div>
-        <div class="stat-value">+${totalRestocked}</div>
+    </div>
+  </div>
+  <div class="col-md-2 mb-3">
+    <div class="card text-center border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="text-muted">Restocked</h6>
+        <h4 class="fw-bold text-success">+${totalRestocked}</h4>
       </div>
-      <div class="col-md-2 stat-box">
-        <div>Returned</div>
-        <div class="stat-value">+${totalReturned}</div>
+    </div>
+  </div>
+  <div class="col-md-2 mb-3">
+    <div class="card text-center border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="text-muted">Returned</h6>
+        <h4 class="fw-bold text-info">+${totalReturned}</h4>
       </div>
-      <div class="col-md-2 stat-box">
-        <div>Sold</div>
-        <div class="stat-value">${totalSold}</div>
+    </div>
+  </div>
+  <div class="col-md-2 mb-3">
+    <div class="card text-center border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="text-muted">Sold</h6>
+        <h4 class="fw-bold text-danger">${totalSold}</h4>
       </div>
-      <div class="col-md-2 stat-box">
-        <div>Current Stock</div>
-        <div class="stat-value">${totalCurrent}</div>
+    </div>
+  </div>
+  <div class="col-md-2 mb-3">
+    <div class="card text-center border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="text-muted">Current Stock</h6>
+        <h4 class="fw-bold text-primary">${totalCurrent}</h4>
       </div>
-    `;
+    </div>
+  </div>
+`;
+
   }
+
+  function showToast(message, type = 'info') {
+  const toastEl = document.getElementById('toastMsg');
+  const body = toastEl.querySelector('.toast-body');
+  body.textContent = message;
+  body.className = `toast-body text-${type}`;
+
+  const toast = new bootstrap.Toast(toastEl);
+  toast.show();
+}
+
 
   async function loadBooks() {
-    const tbody = document.getElementById('booksTableBody');
-    tbody.innerHTML = '<tr><td colspan="6" class="text-center">Loading...</td></tr>';
+  const tbody = document.getElementById('booksTableBody');
+  tbody.innerHTML = `
+    <tr><td colspan="6" class="text-center">
+      <div class="spinner-border text-primary" role="status"></div>
+    </td></tr>
+  `;
 
-    try {
-      const { data: books, error } = await supabase
-        .from('books')
-        .select('id, title, quantity, initial_stock, total_restocked, total_returned, status')
-        .order('title', { ascending: true });
+  try {
+    const { data: books, error } = await supabase
+      .from('books')
+      .select('id, title, quantity, initial_stock, total_restocked, total_returned, status')
+      .order('title', { ascending: true });
 
-      if (error) throw error;
-      if (!books || books.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center">📭 No books found.</td></tr>';
-        return;
-      }
-
-      renderBooks(books);
-      renderStats(books);
-    } catch (err) {
-      console.error("💥 ERROR loading books:", err.message);
-      tbody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">❌ Failed to load stock data: ${err.message}</td></tr>`;
+    if (error) throw error;
+    if (!books || books.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center">📭 No books found.</td></tr>';
+      return;
     }
+
+    renderBooks(books);
+    renderStats(books);
+    showToast("✅ Books loaded successfully", "success");
+  } catch (err) {
+    console.error("💥 ERROR loading books:", err.message);
+    tbody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">❌ Failed to load stock data: ${err.message}</td></tr>`;
+    showToast("❌ Failed to load books", "danger");
   }
+}
+
 
   // ----------------- Logout Functionality -----------------
   document.getElementById("logoutBtn").addEventListener("click", async (e) => {
@@ -206,6 +261,10 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
       }, 2000);
     }
   });
+  document.getElementById('toggleSidebar').addEventListener('click', () => {
+  document.querySelector('.sidebar').classList.toggle('d-none');
+});
+
 </script>
 </body>
 </html>

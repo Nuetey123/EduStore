@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduStore | Uniform Management</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #1e2a78;
+      --primary-light: #2c3aa4;
+      --sidebar-width: 250px;
+      --card-radius: 16px;
+    }
+    body {
+      background-color: #f8fafc;
+      font-family: 'Poppins', sans-serif;
+      color: #334155;
+    }
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: var(--sidebar-width);
+      background: linear-gradient(180deg, var(--primary-color), #1a235a);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 0;
+      box-shadow: 4px 0 12px rgba(0,0,0,0.12);
+      z-index: 1000;
+    }
+    .logo {
+      text-align: center;
+      font-weight: 700;
+      font-size: 1.8rem;
+      padding: 0 20px 25px;
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+      margin-bottom: 10px;
+    }
+    .sidebar a {
+      color: rgba(255,255,255,0.92);
+      text-decoration: none;
+      padding: 14px 25px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.25s ease;
+      font-size: 15px;
+      border-left: 3px solid transparent;
+    }
+    .sidebar a:hover,
+    .sidebar a.active {
+      background: rgba(255,255,255,0.12);
+      border-left: 3px solid #4f46e5;
+      color: white;
+    }
+    .sidebar a i {
+      width: 24px;
+      text-align: center;
+    }
+
+    /* Main area */
+    main {
+      margin-left: var(--sidebar-width);
+      padding: 25px;
+      transition: margin-left 0.3s ease;
+    }
+
+    .header {
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .card {
+      border-radius: var(--card-radius);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      border: none;
+      transition: transform 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      border: none;
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-weight: 600;
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-light);
+      transform: translateY(-1px);
+    }
+    
+    .btn-outline-primary {
+      color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    
+    .form-label {
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #1e293b;
+    }
+    
+    .uniform-category {
+      background-color: #f1f5f9;
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-top: 5px;
+      font-size: 0.85rem;
+      color: #475569;
+    }
+    
+    .stock-badge {
+      font-size: 0.8rem;
+      padding: 3px 8px;
+      border-radius: 20px;
+    }
+    .stock-low {
+      background-color: #fee2e2;
+      color: #ef4444;
+    }
+    .stock-good {
+      background-color: #dcfce7;
+      color: #16a34a;
+    }
+    
+    .uniform-item {
+      background: white;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 15px;
+      border: 1px solid #e2e8f0;
+      transition: all 0.2s;
+    }
+    .uniform-item:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    .category-header {
+      background: var(--primary-color);
+      color: white;
+      padding: 12px 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+    
+    @media (max-width: 991px) {
+      .sidebar {
+        transform: translateX(-100%);
+        width: 280px;
+      }
+      .sidebar.show {
+        transform: translateX(0);
+      }
+      main {
+        margin-left: 0;
+      }
+      .menu-toggle {
+        display: block !important;
+      }
+    }
+    
+    .menu-toggle {
+      display: none;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      font-size: 1.2rem;
+      margin-right: 15px;
+    }
+    
+    .action-btn {
+      width: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      margin: 0 2px;
+    }
+    
+    .modal-content {
+      border-radius: 16px;
+      border: none;
+    }
+    
+    .modal-header {
+      background: linear-gradient(180deg, var(--primary-color), var(--primary-light));
+      color: white;
+      border-top-left-radius: 16px;
+      border-top-right-radius: 16px;
+    }
+    
+    .table th {
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="logo">EduStore</div>
+  <a href="admin-dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
+  <a href="sales-viewer.html"><i class="fas fa-book"></i> Book Sales</a>
+  <a href="inventory.html"><i class="fas fa-boxes"></i> Inventory</a>
+  <a href="uniform-transactions.html"><i class="fas fa-tshirt"></i> Uniform Sales</a>
+
+</div>
+
+<!-- Main content -->
+<main>
+  <div class="d-flex align-items-center mb-4">
+    <button class="menu-toggle d-lg-none" id="menuToggle">☰</button>
+    <h2 class="mb-0"><i class="fas fa-tshirt me-2 text-primary"></i>Uniform Management</h2>
+  </div>
+
+  <div class="row g-4">
+    <!-- Uniform List -->
+    <div class="col-lg-8">
+      <div class="card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h5 class="mb-0 fw-bold text-primary">Uniform Items</h5>
+          <button class="btn btn-primary" id="addUniformBtn">
+            <i class="fas fa-plus me-2"></i>Add New Uniform
+          </button>
+        </div>
+        
+        <div id="uniformsContainer">
+          <!-- Uniform items will be loaded here -->
+          <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Stats Card -->
+    <div class="col-lg-4">
+      <div class="card p-4 h-100">
+        <h5 class="mb-4 fw-bold text-primary">Inventory Overview</h5>
+        
+        <div class="row g-3">
+          <div class="col-6">
+            <div class="card bg-light p-3 text-center">
+              <h3 id="totalItems" class="mb-0">0</h3>
+              <small class="text-muted">Total Items</small>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="card bg-light p-3 text-center">
+              <h3 id="lowStockCount" class="mb-0">0</h3>
+              <small class="text-muted">Low Stock</small>
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="card bg-primary text-white p-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h5 class="mb-0">₵<span id="totalValue">0.00</span></h5>
+                  <small>Inventory Value</small>
+                </div>
+                <i class="fas fa-chart-line fa-2x"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Add/Edit Uniform Modal -->
+<div class="modal fade" id="uniformModal" tabindex="-1" aria-labelledby="uniformModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="uniformModalLabel">Add New Uniform</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="uniformForm">
+          <input type="hidden" id="uniformId">
+          
+          <div class="mb-3">
+            <label class="form-label">Uniform Name</label>
+            <input type="text" id="uniformName" class="form-control" placeholder="e.g., Primary School Uniform" required>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Category</label>
+              <select id="uniformCategory" class="form-select" required>
+                <option value="full_set">Full Set</option>
+                <option value="half_set_top">Half Set (Top)</option>
+                <option value="half_set_bottom">Half Set (Bottom)</option>
+                <option value="pe_kit">P.E. Kit</option>
+                <option value="fabric">Fabric</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Gender</label>
+              <select id="uniformGender" class="form-select" required>
+                <option value="boy">Boy</option>
+                <option value="girl">Girl</option>
+                <option value="unisex">Unisex</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Price (₵)</label>
+              <input type="number" id="uniformPrice" class="form-control" min="0" step="0.01" placeholder="0.00" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Stock Quantity</label>
+              <input type="number" id="uniformStock" class="form-control" min="0" placeholder="0" required>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">Description (Optional)</label>
+            <textarea id="uniformDescription" class="form-control" rows="2" placeholder="Additional details about this uniform..."></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="saveUniformBtn">
+          <i class="fas fa-save me-2"></i>Save Uniform
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
+<script>
+  // Initialize Supabase
+  const supabaseUrl = "https://uyqpvhcjsflogujbfheu.supabase.co";
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5cXB2aGNqc2Zsb2d1amJmaGV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY5MTQ4NzQsImV4cCI6MjA3MjQ5MDg3NH0.Yn75_sNjk8-bZhvFRyGZML3rLWro0W4tsBXhdcE6aDA";
+  const { createClient } = window.supabase;
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
+  // DOM Elements
+  const uniformsContainer = document.getElementById('uniformsContainer');
+  const addUniformBtn = document.getElementById('addUniformBtn');
+  const uniformModal = new bootstrap.Modal(document.getElementById('uniformModal'));
+  const uniformForm = document.getElementById('uniformForm');
+  const saveUniformBtn = document.getElementById('saveUniformBtn');
+  const menuToggle = document.getElementById('menuToggle');
+  
+  // Stats elements
+  const totalItemsEl = document.getElementById('totalItems');
+  const lowStockCountEl = document.getElementById('lowStockCount');
+  const totalValueEl = document.getElementById('totalValue');
+
+  // Initialize
+  document.addEventListener('DOMContentLoaded', () => {
+    loadUniforms();
+    
+    // Mobile menu toggle
+    menuToggle?.addEventListener('click', () => {
+      document.querySelector('.sidebar').classList.toggle('show');
+    });
+    
+    // Add uniform button
+    addUniformBtn.addEventListener('click', () => {
+      document.getElementById('uniformModalLabel').textContent = 'Add New Uniform';
+      uniformForm.reset();
+      document.getElementById('uniformId').value = '';
+      uniformModal.show();
+    });
+    
+    // Save uniform button
+    saveUniformBtn.addEventListener('click', saveUniform);
+  });
+
+  // Load uniforms from database
+  async function loadUniforms() {
+    try {
+      const { data, error } = await supabase
+        .from('uniforms')
+        .select('*')
+        .order('category')
+        .order('gender');
+
+      if (error) throw error;
+      
+      renderUniforms(data);
+      updateStats(data);
+      
+    } catch (error) {
+      console.error('Error loading uniforms:', error);
+      uniformsContainer.innerHTML = `
+        <div class="alert alert-danger">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          Error loading uniforms: 'Check internet connection'}
+        </div>
+      `;
+    }
+  }
+
+  // Render uniforms in the UI
+  function renderUniforms(uniforms) {
+    if (!uniforms || uniforms.length === 0) {
+      uniformsContainer.innerHTML = `
+        <div class="text-center py-5">
+          <i class="fas fa-tshirt fa-3x text-muted mb-3"></i>
+          <h5>No uniforms found</h5>
+          <p class="text-muted">Add your first uniform item to get started</p>
+        </div>
+      `;
+      return;
+    }
+    
+    // Group uniforms by category
+    const categories = {};
+    uniforms.forEach(item => {
+      const cat = item.category || 'other';
+      if (!categories[cat]) categories[cat] = [];
+      categories[cat].push(item);
+    });
+    
+    // Category labels
+    const categoryLabels = {
+      full_set: 'Full Set',
+      half_set_top: 'Half Set (Top)',
+      half_set_bottom: 'Half Set (Bottom)',
+      pe_kit: 'P.E. Kit',
+      fabric: 'Fabric'
+    };
+    
+    // Gender labels
+    const genderLabels = {
+      boy: 'Boy',
+      girl: 'Girl',
+      unisex: 'Unisex'
+    };
+    
+    let html = '';
+    
+    // Render each category
+    Object.entries(categories).forEach(([catKey, items]) => {
+      const label = categoryLabels[catKey] || catKey.replace('_', ' ');
+      html += `<div class="category-header">${label}</div>`;
+      
+      items.forEach(item => {
+        const genderLabel = genderLabels[item.gender] ? ` (${genderLabels[item.gender]})` : '';
+        const stockClass = item.stock <= 5 ? 'stock-low' : 'stock-good';
+        const stockText = item.stock <= 5 ? 'LOW STOCK' : `${item.stock} in stock`;
+        
+        html += `
+          <div class="uniform-item">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <h6 class="mb-1">${item.name}${genderLabel}</h6>
+                <p class="text-muted mb-2">${item.description || 'No description'}</p>
+                <div class="d-flex align-items-center">
+                  <span class="me-3">₵${parseFloat(item.price).toFixed(2)}</span>
+                  <span class="stock-badge ${stockClass}">${stockText}</span>
+                </div>
+              </div>
+              <div>
+                <button class="btn action-btn btn-outline-primary" onclick="editUniform(${item.id})">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn action-btn btn-outline-danger" onclick="deleteUniform(${item.id})">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    });
+    
+    uniformsContainer.innerHTML = html;
+  }
+  
+  // Update inventory stats
+  function updateStats(uniforms) {
+    const totalItems = uniforms.length;
+    const lowStockCount = uniforms.filter(item => item.stock <= 5).length;
+    const totalValue = uniforms.reduce((sum, item) => sum + (item.price * item.stock), 0);
+    
+    totalItemsEl.textContent = totalItems;
+    lowStockCountEl.textContent = lowStockCount;
+    totalValueEl.textContent = totalValue.toFixed(2);
+  }
+  
+  // Edit uniform
+  function editUniform(id) {
+    // Find the uniform
+    const uniform = uniforms.find(item => item.id === id);
+    if (!uniform) return;
+    
+    // Populate form
+    document.getElementById('uniformId').value = uniform.id;
+    document.getElementById('uniformName').value = uniform.name;
+    document.getElementById('uniformCategory').value = uniform.category;
+    document.getElementById('uniformGender').value = uniform.gender;
+    document.getElementById('uniformPrice').value = uniform.price;
+    document.getElementById('uniformStock').value = uniform.stock;
+    document.getElementById('uniformDescription').value = uniform.description || '';
+    
+    // Update modal title
+    document.getElementById('uniformModalLabel').textContent = 'Edit Uniform';
+    
+    // Show modal
+    uniformModal.show();
+  }
+  
+  // Save uniform (add or update)
+  async function saveUniform() {
+    const id = document.getElementById('uniformId').value;
+    const name = document.getElementById('uniformName').value.trim();
+    const category = document.getElementById('uniformCategory').value;
+    const gender = document.getElementById('uniformGender').value;
+    const price = parseFloat(document.getElementById('uniformPrice').value);
+    const stock = parseInt(document.getElementById('uniformStock').value);
+    const description = document.getElementById('uniformDescription').value.trim();
+    
+    // Validation
+    if (!name || isNaN(price) || price < 0 || isNaN(stock) || stock < 0) {
+      alert('Please fill in all required fields with valid values.');
+      return;
+    }
+    
+    try {
+      let error;
+      
+      if (id) {
+        // Update existing uniform
+        const { error: updateError } = await supabase
+          .from('uniforms')
+          .update({ name, category, gender, price, stock, description })
+          .eq('id', id);
+        error = updateError;
+      } else {
+        // Insert new uniform
+        const { error: insertError } = await supabase
+          .from('uniforms')
+          .insert([{ name, category, gender, price, stock, description }]);
+        error = insertError;
+      }
+      
+      if (error) throw error;
+      
+      // Success
+      alert(id ? 'Uniform updated successfully!' : 'New uniform added successfully!');
+      uniformModal.hide();
+      loadUniforms();
+      
+    } catch (error) {
+      console.error('Error saving uniform:', error);
+      alert('Error saving uniform: ' + (error.message || 'Unknown error'));
+    }
+  }
+  
+  // Delete uniform
+  async function deleteUniform(id) {
+    if (!confirm('Are you sure you want to delete this uniform? This action cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      const { error } = await supabase
+        .from('uniforms')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      alert('Uniform deleted successfully!');
+      loadUniforms();
+      
+    } catch (error) {
+      console.error('Error deleting uniform:', error);
+      alert('Error deleting uniform: ' + (error.message || 'Unknown error'));
+    }
+  }
+  
+  // Store uniforms globally for editing
+  let uniforms = [];
+  
+  // Override loadUniforms to store uniforms
+  async function loadUniforms() {
+    try {
+      const { data, error } = await supabase
+        .from('uniforms')
+        .select('*')
+        .order('category')
+        .order('gender');
+
+      if (error) throw error;
+      
+      uniforms = data;
+      renderUniforms(data);
+      updateStats(data);
+      
+    } catch (error) {
+      console.error('Error loading uniforms:', error);
+      uniformsContainer.innerHTML = `
+        <div class="alert alert-danger">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          Error loading uniforms: ${error.message}
+        </div>
+      `;
+    }
+  }
+</script>
+</body>
+</html>

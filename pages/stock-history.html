@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduStore | Stock History</title>
+  
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --primary-color: #1e2a78;
+      --sidebar-width: 250px;
+    }
+    body {
+      background-color: #f8fafc;
+      font-family: 'Poppins', sans-serif;
+    }
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: var(--sidebar-width);
+      background: linear-gradient(180deg, var(--primary-color), #1a235a);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 0;
+      box-shadow: 4px 0 12px rgba(0,0,0,0.12);
+      z-index: 1000;
+    }
+    .logo {
+      text-align: center;
+      font-weight: 700;
+      font-size: 1.5rem;
+      padding: 0 20px 25px;
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+      margin-bottom: 10px;
+    }
+    .sidebar a {
+      color: rgba(255,255,255,0.92);
+      text-decoration: none;
+      padding: 14px 25px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.25s ease;
+      font-size: 15px;
+      border-left: 3px solid transparent;
+    }
+    .sidebar a:hover,
+    .sidebar a.active {
+      background: rgba(255,255,255,0.12);
+      border-left: 3px solid #4f46e5;
+      color: white;
+    }
+    .sidebar a i {
+      width: 24px;
+      text-align: center;
+    }
+    main {
+      margin-left: var(--sidebar-width);
+      padding: 25px;
+    }
+    .menu-toggle {
+      display: none;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      font-size: 1.2rem;
+      margin-right: 15px;
+    }
+    @media (max-width: 991px) {
+      .sidebar {
+        transform: translateX(-100%);
+        width: 280px;
+      }
+      .sidebar.show {
+        transform: translateX(0);
+      }
+      main {
+        margin-left: 0;
+      }
+      .menu-toggle {
+        display: block !important;
+      }
+    }
+    .stock-history-item {
+      border-left: 3px solid var(--primary-color);
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="d-flex">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="logo">EduStore Admin</div>
+      <a href="admin-dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
+      <a href="sales-viewer.html"><i class="fas fa-shopping-cart"></i> Sales</a>
+      <a href="inventory.html"><i class="fas fa-boxes"></i> Inventory</a>
+      <a href="stock-history.html" class="active"><i class="fas fa-history"></i> Stock History</a>
+      <a href="stock-viewer.html"><i class="fas fa-chart-bar"></i> Stock View</a>
+      <a href="#" id="logoutBtn" style="margin-top: auto; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.15);">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </a>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-grow-1">
+      <div class="d-flex align-items-center mb-4">
+        <button class="menu-toggle d-lg-none" id="menuToggle">☰</button>
+        <h1 class="mb-0"><i class="fas fa-history me-2 text-primary"></i>Stock History</h1>
+      </div>
+
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">📚 Restock Records</h5>
+              <div class="d-flex gap-2">
+                <select id="bookFilter" class="form-select" style="width: 250px;">
+                  <option value="">All Books</option>
+                </select>
+                <button class="btn btn-outline-primary" id="refreshBtn">
+                  <i class="fas fa-sync"></i>
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                 <thead class="table-light">
+                <tr>
+                <th>Book Title</th>
+                <th>Quantity Added</th>
+                <th>Cost Price (₵)</th>
+                <th>Selling Price (₵)</th>
+                <th>Total Cost (₵)</th>
+                <th>Potential Revenue (₵)</th>
+                <th>Notes</th>
+                <th>Date Added</th>
+                </tr>
+            </thead>
+                  <tbody id="stockHistoryTable">
+                    <tr>
+                      <td colspan="6" class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                          <span class="visually-hidden">Loading...</span>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              
+              <div class="d-flex justify-content-between align-items-center mt-3">
+                <small class="text-muted" id="totalRecords">Loading...</small>
+                <nav>
+                  <ul class="pagination pagination-sm mb-0" id="pagination"></ul>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
+    <div id="toastContainer" class="toast-container"></div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Supabase & App JS -->
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    const SUPABASE_URL = "https://uyqpvhcjsflogujbfheu.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5cXB2aGNqc2Zsb2d1amJmaGV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY5MTQ4NzQsImV4cCI6MjA3MjQ5MDg3NH0.Yn75_sNjk8-bZhvFRyGZML3rLWro0W4tsBXhdcE6aDA";
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const stockHistoryTable = document.getElementById('stockHistoryTable');
+    const bookFilter = document.getElementById('bookFilter');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const totalRecords = document.getElementById('totalRecords');
+    const pagination = document.getElementById('pagination');
+
+    let currentPage = 1;
+    const recordsPerPage = 20;
+
+    // Toast helper
+    function showToast(message, type = "success") {
+      const toast = document.createElement("div");
+      toast.className = `toast align-items-center text-bg-${type} border-0`;
+      toast.role = "alert";
+      toast.innerHTML = `<div class="d-flex"><div class="toast-body">${message}</div><button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
+      document.getElementById("toastContainer").appendChild(toast);
+      new bootstrap.Toast(toast).show();
+    }
+
+    // Load books for filter dropdown
+    async function loadBooksForFilter() {
+      try {
+        const { data, error } = await supabase
+          .from('books')
+          .select('id, title')
+          .order('title', { ascending: true });
+
+        if (error) throw error;
+
+        bookFilter.innerHTML = '<option value="">All Books</option>';
+        data.forEach(book => {
+          const option = document.createElement('option');
+          option.value = book.id;
+          option.textContent = book.title;
+          bookFilter.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Error loading books for filter:', error);
+      }
+    }
+
+  
+    // Load stock history
+async function loadStockHistory(page = 1, bookId = null) {
+  try {
+    let query = supabase
+      .from('stock_history')
+      .select(`
+        id,
+        quantity_added,
+        cost_price,
+        selling_price,
+        notes,
+        created_at,
+        books(title)
+      `)
+      .order('created_at', { ascending: false });
+
+    if (bookId) {
+      query = query.eq('book_id', bookId);
+    }
+
+    // Get total count
+    const { count } = await supabase
+      .from('stock_history')
+      .select('*', { count: 'exact', head: true });
+
+    // Apply pagination
+    const { data, error } = await query
+      .range((page - 1) * recordsPerPage, page * recordsPerPage - 1);
+
+    if (error) throw error;
+
+    renderStockHistory(data, count);
+    
+  } catch (error) {
+    console.error('Error loading stock history:', error);
+    stockHistoryTable.innerHTML = `
+      <tr>
+        <td colspan="8" class="text-center text-danger">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          Failed to load stock history: ${error.message}
+        </td>
+      </tr>
+    `;
+  }
+}
+
+   
+  // Render stock history table
+function renderStockHistory(data, totalCount) {
+  if (!data || data.length === 0) {
+    stockHistoryTable.innerHTML = `
+      <tr>
+        <td colspan="8" class="text-center text-muted">
+          <i class="fas fa-history fa-2x mb-2"></i>
+          <p>No stock history records found</p>
+        </td>
+      </tr>
+    `;
+    totalRecords.textContent = '0 records';
+    pagination.innerHTML = '';
+    return;
+  }
+
+  stockHistoryTable.innerHTML = data.map(record => {
+    const totalCost = record.quantity_added * record.cost_price;
+    const potentialRevenue = record.quantity_added * record.selling_price;
+    const dateAdded = new Date(record.created_at).toLocaleString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    
+    return `
+      <tr>
+        <td class="fw-bold">${record.books.title}</td>
+        <td class="text-success">+${record.quantity_added}</td>
+        <td>₵${parseFloat(record.cost_price).toFixed(2)}</td>
+        <td class="text-primary">₵${parseFloat(record.selling_price).toFixed(2)}</td>
+        <td class="fw-bold">₵${totalCost.toFixed(2)}</td>
+        <td class="fw-bold text-success">₵${potentialRevenue.toFixed(2)}</td>
+        <td class="text-muted">${record.notes || '-'}</td>
+        <td class="text-muted">${dateAdded}</td>
+      </tr>
+    `;
+  }).join('');
+
+  totalRecords.textContent = `Showing ${data.length} of ${totalCount || 0} records`;
+  renderPagination(currentPage, totalCount);
+}
+
+    // Render pagination
+    function renderPagination(currentPage, totalRecords) {
+      const totalPages = Math.ceil(totalRecords / recordsPerPage);
+      
+      if (totalPages <= 1) {
+        pagination.innerHTML = '';
+        return;
+      }
+
+      let paginationHTML = '';
+      
+      // Previous button
+      paginationHTML += `
+        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+          <button class="page-link" onclick="loadStockHistory(${currentPage - 1}, ${bookFilter.value || 'null'})">Previous</button>
+        </li>
+      `;
+
+      // Page numbers (show max 5 pages)
+      const startPage = Math.max(1, currentPage - 2);
+      const endPage = Math.min(totalPages, currentPage + 2);
+      
+      for (let i = startPage; i <= endPage; i++) {
+        paginationHTML += `
+          <li class="page-item ${i === currentPage ? 'active' : ''}">
+            <button class="page-link" onclick="loadStockHistory(${i}, ${bookFilter.value || 'null'})">${i}</button>
+          </li>
+        `;
+      }
+
+      // Next button
+      paginationHTML += `
+        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+          <button class="page-link" onclick="loadStockHistory(${currentPage + 1}, ${bookFilter.value || 'null'})">Next</button>
+        </li>
+      `;
+
+      pagination.innerHTML = paginationHTML;
+    }
+
+    // Logout functionality
+    document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+      e.preventDefault();
+      if (!confirm("Are you sure you want to log out?")) return;
+      
+      try {
+        await supabase.auth.signOut();
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href = 'sales-login.html';
+      } catch (error) {
+        showToast("Logout failed: " + error.message, "danger");
+      }
+    });
+
+    // Mobile menu toggle
+    document.getElementById('menuToggle').addEventListener('click', () => {
+      document.querySelector('.sidebar').classList.toggle('show');
+    });
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadBooksForFilter();
+      await loadStockHistory();
+      
+      // Filter by book
+      bookFilter.addEventListener('change', () => {
+        currentPage = 1;
+        const selectedBookId = bookFilter.value || null;
+        loadStockHistory(currentPage, selectedBookId);
+      });
+      
+      // Refresh button
+      refreshBtn.addEventListener('click', () => {
+        const selectedBookId = bookFilter.value || null;
+        loadStockHistory(currentPage, selectedBookId);
+      });
+    });
+
+    // Make function globally accessible for pagination
+    window.loadStockHistory = loadStockHistory;
+  </script>
+</body>
+</html>

@@ -211,7 +211,8 @@
 }
 
  // ✅ Add new book
- form.addEventListener("submit", async (e) => {
+ // ✅ Add new book WITH stock history tracking
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const title = document.getElementById("title").value;
@@ -219,42 +220,46 @@
   const selling = parseFloat(document.getElementById("selling").value);
   const quantity = parseInt(document.getElementById("quantity").value);
 
-  // Insert new book
-  // ✅ Insert new book — WITH initial_stock and total_restocked
+  try {
+    // Insert new book
+    const { data: bookData, error: bookError } = await supabase
+      .from("books")
+      .insert([
+        { 
+          title, 
+          cost_price: cost, 
+          selling_price: selling, 
+          quantity,
+          initial_stock: quantity,
+          total_restocked: 0,
+          total_returned: 0
+        }
+      ])
+      .select('id');
 
-  console.log({
-  title,
-  cost,
-  selling,
-  quantity,
-  initial_stock: quantity,
-  total_restocked: 0,
-  total_returned: 0
-});
+    if (bookError) throw bookError;
 
-const { error } = await supabase
-  .from("books")
-  .insert([
-    { 
-      title, 
-      cost_price: cost, 
-      selling_price: selling, 
-      quantity,
-      initial_stock: quantity,
-      total_restocked: 0,
-      total_returned: 0
-    }
-  ]);
+    // Add to stock history
+    const { error: historyError } = await supabase
+      .from("stock_history")
+      .insert([
+        {
+          book_id: bookData[0].id,
+          quantity_added: quantity,
+          cost_price: cost,
+          selling_price: selling, 
+          notes: "Initial stock"
+        }
+      ]);
 
+    if (historyError) throw historyError;
 
-  if (error) {
+    showToast("✅ Book and stock history added successfully");
+    form.reset();
+    
+  } catch (error) {
     showToast("❌ Add failed: " + error.message, "danger");
-    return;
   }
-
-  // ✅ DON'T fetch or add row manually — let real-time listener do it!
-  showToast("✅ Book added successfully");
-  form.reset();
 });
 
 
@@ -273,44 +278,67 @@ editForm.addEventListener("submit", async e => {
     return;
   }
 
-  // ✅ Fetch from BOOKS table
-  const { data: book, error: fetchError } = await supabase
-    .from("books")
-    .select("quantity, total_restocked")
-    .eq("id", id)
-    .single();
+  try {
+    // Fetch current book data
+    const { data: book, error: fetchError } = await supabase
+      .from("books")
+      .select("quantity, total_restocked")
+      .eq("id", id)
+      .single();
 
-  if (fetchError) {
-    showToast("❌ Failed to fetch current stock: " + fetchError.message, "danger");
-    return;
-  }
+    if (fetchError) {
+      showToast("❌ Failed to fetch current stock: " + fetchError.message, "danger");
+      return;
+    }
 
-  // ✅ Calculate new values
-  const newQuantity = book.quantity + amountToAdd;
-  const newTotalRestocked = book.total_restocked + amountToAdd;
+    // Calculate new values
+    const newQuantity = book.quantity + amountToAdd;
+    const newTotalRestocked = book.total_restocked + amountToAdd;
 
-  // ✅ Update BOOKS table
-  const { error } = await supabase
-    .from("books")
-    .update({ 
-      title, 
-      cost_price: cost, 
-      selling_price: selling, 
-      quantity: newQuantity,
-      total_restocked: newTotalRestocked
-    })
-    .eq("id", id);
+    // Update BOOKS table
+    const { error: updateError } = await supabase
+      .from("books")
+      .update({ 
+        title, 
+        cost_price: cost, 
+        selling_price: selling, 
+        quantity: newQuantity,
+        total_restocked: newTotalRestocked
+      })
+      .eq("id", id);
 
-  if (error) {
+    if (updateError) {
+      showToast("❌ Update failed: " + updateError.message, "danger");
+      return;
+    }
+
+    // Add to stock history (only if adding stock)
+    if (amountToAdd > 0) {
+      const { error: historyError } = await supabase
+        .from("stock_history")
+        .insert([
+          {
+            book_id: parseInt(id),
+            quantity_added: amountToAdd,
+            cost_price: cost,
+            selling_price: selling, 
+            notes: `Restock: ${amountToAdd} units`
+          }
+        ]);
+
+      if (historyError) {
+        showToast("❌ Stock history update failed: " + historyError.message, "danger");
+        return;
+      }
+    }
+
+    showToast("✅ Book updated and stock increased successfully!", "success");
+    bootstrap.Modal.getInstance(document.getElementById("editModal")).hide();
+    loadBooks();
+    
+  } catch (error) {
     showToast("❌ Update failed: " + error.message, "danger");
-    return;
   }
-
-  showToast("✅ Book updated and stock increased successfully!", "success");
-  bootstrap.Modal.getInstance(document.getElementById("editModal")).hide();
-
-  // ✅ RELOAD book_reports to reflect changes
-  loadBooks();
 });
   // ✅ Start delete
   window.startDelete = (id) => {
