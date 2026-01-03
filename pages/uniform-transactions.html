@@ -137,7 +137,7 @@
             <input type="text" id="searchInput" class="form-control" placeholder="Search student name..." style="width: 250px;">
           </div>
         </div>
-        
+
         <div class="table-responsive">
           <table class="table table-hover">
             <thead class="table-light">
@@ -162,7 +162,7 @@
             </tbody>
           </table>
         </div>
-        
+
         <div class="d-flex justify-content-between align-items-center mt-3">
           <small class="text-muted" id="totalRecords">Loading...</small>
           <nav>
@@ -176,12 +176,12 @@
   </div>
 </main>
 
-<script>
-  // Initialize Supabase
-  const supabaseUrl = "https://uyqpvhcjsflogujbfheu.supabase.co";
-  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5cXB2aGNqc2Zsb2d1amJmaGV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY5MTQ4NzQsImV4cCI6MjA3MjQ5MDg3NH0.Yn75_sNjk8-bZhvFRyGZML3rLWro0W4tsBXhdcE6aDA";
-  const { createClient } = window.supabase;
-  const supabase = createClient(supabaseUrl, supabaseKey);
+ <script  type="module">
+      import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+  const SUPABASE_URL = "https://uyqpvhcjsflogujbfheu.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5cXB2aGNqc2Zsb2d1amJmaGV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY5MTQ4NzQsImV4cCI6MjA3MjQ5MDg3NH0.Yn75_sNjk8-bZhvFRyGZML3rLWro0W4tsBXhdcE6aDA"; // 🔑 replace with yours
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   // DOM Elements
   const transactionsTable = document.getElementById('transactionsTable');
@@ -276,7 +276,7 @@
     transactionsTable.innerHTML = transactions.map(transaction => {
       const cashierName = (transaction.cashier_first_name || "") + " " + (transaction.cashier_last_name || "");
       const trimmedCashier = cashierName.trim() || "Staff";
-      
+
       return `
         <tr>
           <td class="fw-bold">${transaction.student_name}</td>
@@ -301,14 +301,14 @@
   // Render pagination
   function renderPagination(currentPage, totalRecords) {
     const totalPages = Math.ceil(totalRecords / recordsPerPage);
-    
+
     if (totalPages <= 1) {
       pagination.innerHTML = '';
       return;
     }
 
     let paginationHTML = '';
-    
+
     // Previous button
     paginationHTML += `
       <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
@@ -319,7 +319,7 @@
     // Page numbers
     const startPage = Math.max(1, currentPage - 2);
     const endPage = Math.min(totalPages, currentPage + 2);
-    
+
     for (let i = startPage; i <= endPage; i++) {
       paginationHTML += `
         <li class="page-item ${i === currentPage ? 'active' : ''}">
@@ -341,16 +341,16 @@
   // Initialize
   document.addEventListener('DOMContentLoaded', async () => {
     await checkAuth();
-    
+
     // Load transactions
     loadTransactions();
-    
+
     // Search functionality
     searchInput.addEventListener('input', () => {
       const searchTerm = searchInput.value.trim();
       loadTransactions(1, searchTerm);
     });
-    
+
     // Mobile menu toggle
     const menuToggle = document.getElementById('menuToggle');
     const sidebar = document.querySelector('.sidebar');

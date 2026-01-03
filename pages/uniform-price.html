@@ -350,16 +350,15 @@
     </div>
   </div>
 </div>
-
+<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<script type="module">
-  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+ <script  type="module">
+      import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
   const SUPABASE_URL = "https://uyqpvhcjsflogujbfheu.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5cXB2aGNqc2Zsb2d1amJmaGV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY5MTQ4NzQsImV4cCI6MjA3MjQ5MDg3NH0.Yn75_sNjk8-bZhvFRyGZML3rLWro0W4tsBXhdcE6aDA"; // 🔑 replace with yours
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
   // DOM Elements
   const uniformsContainer = document.getElementById('uniformsContainer');
   const addUniformBtn = document.getElementById('addUniformBtn');
@@ -395,29 +394,7 @@
   });
 
   // Load uniforms from database
-  async function loadUniforms() {
-    try {
-      const { data, error } = await supabase
-        .from('uniforms')
-        .select('*')
-        .order('category')
-        .order('gender');
 
-      if (error) throw error;
-
-      renderUniforms(data);
-      updateStats(data);
-
-    } catch (error) {
-      console.error('Error loading uniforms:', error);
-      uniformsContainer.innerHTML = `
-        <div class="alert alert-danger">
-          <i class="fas fa-exclamation-triangle me-2"></i>
-          Error loading uniforms: 'Check internet connection'}
-        </div>
-      `;
-    }
-  }
 
   // Render uniforms in the UI
   function renderUniforms(uniforms) {
