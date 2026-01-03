@@ -1,0 +1,4 @@
+{
+    "javascript.format.insertSpaceAfterCommaDelimiter": true,
+    "typescript.format.insertSpaceAfterCommaDelimiter": true
+}

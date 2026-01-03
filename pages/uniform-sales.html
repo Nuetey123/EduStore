@@ -1,366 +1,397 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EduStore | Uniform Sales</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    :root {
-      --primary-color: #1e2a78;
-      --primary-light: #2c3aa4;
-      --sidebar-width: 250px;
-      --card-radius: 16px;
-    }
-    body {
-      background-color: #f8fafc;
-      font-family: 'Poppins', sans-serif;
-      color: #334155;
-    }
-    /* Sidebar */
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100vh;
-      width: var(--sidebar-width);
-      background: linear-gradient(180deg, var(--primary-color), #1a235a);
-      color: white;
-      display: flex;
-      flex-direction: column;
-      padding: 20px 0;
-      box-shadow: 4px 0 12px rgba(0,0,0,0.12);
-      z-index: 1000;
-    }
-    .logo {
-      text-align: center;
-      font-weight: 700;
-      font-size: 1.8rem;
-      padding: 0 20px 25px;
-      border-bottom: 1px solid rgba(255,255,255,0.15);
-      margin-bottom: 10px;
-    }
-    .sidebar a {
-      color: rgba(255,255,255,0.92);
-      text-decoration: none;
-      padding: 14px 25px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      transition: all 0.25s ease;
-      font-size: 15px;
-      border-left: 3px solid transparent;
-    }
-    .sidebar a:hover,
-    .sidebar a.active {
-      background: rgba(255,255,255,0.12);
-      border-left: 3px solid #4f46e5;
-      color: white;
-    }
-    .sidebar a i {
-      width: 24px;
-      text-align: center;
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EduStore | Uniform Sales</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+         :root {
+            --primary-color: #1e2a78;
+            --primary-light: #2c3aa4;
+            --sidebar-width: 250px;
+            --card-radius: 16px;
+        }
 
-    /* Main area */
-    main {
-      margin-left: var(--sidebar-width);
-      padding: 25px;
-      transition: margin-left 0.3s ease;
-    }
+        body {
+            background-color: #f8fafc;
+            font-family: 'Poppins', sans-serif;
+            color: #334155;
+        }
+        /* Sidebar */
 
-    .header {
-      margin-bottom: 25px;
-      padding-bottom: 15px;
-      border-bottom: 1px solid #e2e8f0;
-    }
-    
-    .card {
-      border-radius: var(--card-radius);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-      border: none;
-      transition: transform 0.2s;
-    }
-    .card:hover {
-      transform: translateY(-3px);
-    }
-    
-    .btn-primary {
-      background-color: var(--primary-color);
-      border: none;
-      border-radius: 10px;
-      padding: 10px 16px;
-      font-weight: 600;
-    }
-    .btn-primary:hover {
-      background-color: var(--primary-light);
-      transform: translateY(-1px);
-    }
-    
-    .form-label {
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: #1e293b;
-    }
-    
-    .uniform-category {
-      background-color: #f1f5f9;
-      padding: 8px 12px;
-      border-radius: 8px;
-      margin-top: 5px;
-      font-size: 0.85rem;
-      color: #475569;
-    }
-    
-    .sale-item {
-      background: #f8fafc;
-      border-radius: 10px;
-      padding: 14px;
-      margin-bottom: 12px;
-      border-left: 3px solid var(--primary-color);
-    }
-    
-    .stock-badge {
-      font-size: 0.8rem;
-      padding: 3px 8px;
-      border-radius: 20px;
-    }
-    .stock-low {
-      background-color: #fee2e2;
-      color: #ef4444;
-    }
-    .stock-good {
-      background-color: #dcfce7;
-      color: #16a34a;
-    }
-    
-    @media (max-width: 991px) {
-      .sidebar {
-        transform: translateX(-100%);
-        width: 280px;
-      }
-      .sidebar.show {
-        transform: translateX(0);
-      }
-      main {
-        margin-left: 0;
-      }
-      .menu-toggle {
-        display: block !important;
-      }
-    }
-    
-    .menu-toggle {
-      display: none;
-      background: var(--primary-color);
-      color: white;
-      border: none;
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
-      font-size: 1.2rem;
-      margin-right: 15px;
-    }
-    /* Logout link styling */
-.logout-link {
-  margin-top: auto;
-  padding-top: 20px;
-  border-top: 1px solid rgba(255,255,255,0.15);
-  color: #ff6b6b !important;
-}
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--primary-color), #1a235a);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+            box-shadow: 4px 0 12px rgba(0, 0, 0, 0.12);
+            z-index: 1000;
+        }
 
-.logout-link:hover,
-.logout-link.active {
-  background: rgba(255, 107, 107, 0.15) !important;
-  border-left: 3px solid #ff6b6b !important;
-  color: white !important;
-}
-  </style>
+        .logo {
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.8rem;
+            padding: 0 20px 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            margin-bottom: 10px;
+        }
+
+        .sidebar a {
+            color: rgba(255, 255, 255, 0.92);
+            text-decoration: none;
+            padding: 14px 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.25s ease;
+            font-size: 15px;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background: rgba(255, 255, 255, 0.12);
+            border-left: 3px solid #4f46e5;
+            color: white;
+        }
+
+        .sidebar a i {
+            width: 24px;
+            text-align: center;
+        }
+        /* Main area */
+
+        main {
+            margin-left: var(--sidebar-width);
+            padding: 25px;
+            transition: margin-left 0.3s ease;
+        }
+
+        .header {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .card {
+            border-radius: var(--card-radius);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            border: none;
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 10px;
+            padding: 10px 16px;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-light);
+            transform: translateY(-1px);
+        }
+
+        .form-label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1e293b;
+        }
+
+        .uniform-category {
+            background-color: #f1f5f9;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-top: 5px;
+            font-size: 0.85rem;
+            color: #475569;
+        }
+
+        .sale-item {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 12px;
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .stock-badge {
+            font-size: 0.8rem;
+            padding: 3px 8px;
+            border-radius: 20px;
+        }
+
+        .stock-low {
+            background-color: #fee2e2;
+            color: #ef4444;
+        }
+
+        .stock-good {
+            background-color: #dcfce7;
+            color: #16a34a;
+        }
+
+        @media (max-width: 991px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            main {
+                margin-left: 0;
+            }
+            .menu-toggle {
+                display: block !important;
+            }
+        }
+
+        .menu-toggle {
+            display: none;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            margin-right: 15px;
+        }
+        /* Logout link styling */
+
+        .logout-link {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ff6b6b !important;
+        }
+
+        .logout-link:hover,
+        .logout-link.active {
+            background: rgba(255, 107, 107, 0.15) !important;
+            border-left: 3px solid #ff6b6b !important;
+            color: white !important;
+        }
+    </style>
 </head>
+
 <body>
 
-<!-- Sidebar -->
-<div class="sidebar">
-  <div class="logo">EduStore</div>
-  <a href="sales-dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
-  <a href="sales-dashboard.html"><i class="fas fa-book"></i> Book Sales</a>
-   <a href="#" id="logoutBtn" class="logout-link">
-  <i class="fas fa-sign-out-alt"></i> Log out
-</a>
-</div>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">EduStore</div>
+        <a href="sales-dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="sales-dashboard.html"><i class="fas fa-book"></i> Book Sales</a>
+        <a href="#" id="logoutBtn" class="logout-link">
+            <i class="fas fa-sign-out-alt"></i> Log out
+        </a>
+    </div>
 
-<!-- Main content -->
-<main>
-  <div class="d-flex align-items-center mb-4">
-    <button class="menu-toggle d-lg-none" id="menuToggle">☰</button>
-    <h2 class="mb-0"><i class="fas fa-tshirt me-2 text-primary"></i>Uniform Sales</h2>
-  </div>
-
-  <div class="row g-4">
-    <!-- Sale Form -->
-    <div class="col-lg-7">
-      <div class="card p-4">
-        <h5 class="mb-4 fw-bold text-primary">New Uniform Sale</h5>
-        
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Student Name</label>
-            <input type="text" id="studentName" class="form-control" placeholder="e.g., Kwame Mensah" required>
-          </div>
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Class</label>
-            <input type="text" id="studentClass" class="form-control" placeholder="e.g., Primary 5" required>
-          </div>
+    <!-- Main content -->
+    <main>
+        <div class="d-flex align-items-center mb-4">
+            <button class="menu-toggle d-lg-none" id="menuToggle">☰</button>
+            <h2 class="mb-0"><i class="fas fa-tshirt me-2 text-primary"></i>Uniform Sales</h2>
         </div>
 
-        <div class="mb-3">
-          <label class="form-label">Select Uniform</label>
-          <select id="uniformType" class="form-select" required>
+        <div class="row g-4">
+            <!-- Sale Form -->
+            <div class="col-lg-7">
+                <div class="card p-4">
+                    <h5 class="mb-4 fw-bold text-primary">New Uniform Sale</h5>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Student Name</label>
+                            <input type="text" id="studentName" class="form-control" placeholder="e.g., Kwame Mensah" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Class</label>
+                            <input type="text" id="studentClass" class="form-control" placeholder="e.g., Primary 5" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Select Uniform</label>
+                        <select id="uniformType" class="form-select" required>
             <option value="">Loading uniforms...</option>
           </select>
-          <div id="uniformCategory" class="uniform-category mt-2 d-none"></div>
-        </div>
+                        <div id="uniformCategory" class="uniform-category mt-2 d-none"></div>
+                    </div>
 
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Quantity</label>
-            <input type="number" id="quantity" class="form-control" min="1" value="1">
-            <div id="stockInfo" class="form-text mt-1"></div>
-          </div>
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Unit Price (₵)</label>
-            <input type="text" id="unitPrice" class="form-control" readonly>
-          </div>
-        </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Quantity</label>
+                            <input type="number" id="quantity" class="form-control" min="1" value="1">
+                            <div id="stockInfo" class="form-text mt-1"></div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Unit Price (₵)</label>
+                            <input type="text" id="unitPrice" class="form-control" readonly>
+                        </div>
+                    </div>
 
-        <div class="mb-3">
-          <label class="form-label">Total Amount (₵)</label>
-          <input type="text" id="totalAmount" class="form-control fw-bold" readonly>
-        </div>
+                    <div class="mb-3">
+                        <label class="form-label">Total Amount (₵)</label>
+                        <input type="text" id="totalAmount" class="form-control fw-bold" readonly>
+                    </div>
 
-        <button class="btn btn-primary w-100 py-2" id="addSaleBtn">
+                    <button class="btn btn-primary w-100 py-2" id="addSaleBtn">
           <i class="fas fa-save me-2"></i>Record Sale
         </button>
-      </div>
-    </div>
+                </div>
+            </div>
 
-    <!-- Recent Sales -->
-    <div class="col-lg-5">
-      <div class="card p-4 h-100">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-          <h5 class="mb-0 fw-bold text-primary">Recent Sales</h5>
-          <span class="badge bg-primary">Last 5</span>
+            <!-- Recent Sales -->
+            <div class="col-lg-5">
+                <div class="card p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="mb-0 fw-bold text-primary">Recent Sales</h5>
+                        <span class="badge bg-primary">Last 5</span>
+                    </div>
+                    <div id="recentSales" class="mt-3">
+                        <div class="text-center py-4 text-muted">
+                            <i class="fas fa-receipt fa-2x mb-2"></i>
+                            <p>No sales recorded yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div id="recentSales" class="mt-3">
-          <div class="text-center py-4 text-muted">
-            <i class="fas fa-receipt fa-2x mb-2"></i>
-            <p>No sales recorded yet</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</main>
+    </main>
 
-<script>
-  
-  // Initialize Supabase
-  const supabaseUrl = "https://uyqpvhcjsflogujbfheu.supabase.co";
-  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5cXB2aGNqc2Zsb2d1amJmaGV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY5MTQ4NzQsImV4cCI6MjA3MjQ5MDg3NH0.Yn75_sNjk8-bZhvFRyGZML3rLWro0W4tsBXhdcE6aDA";
-  const { createClient } = window.supabase;
-  const supabase = createClient(supabaseUrl, supabaseKey);
+    <script  type="module">
+      import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-  // DOM Elements
-  const uniformSelect = document.getElementById('uniformType');
-  const quantityInput = document.getElementById('quantity');
-  const unitPriceInput = document.getElementById('unitPrice');
-  const totalAmountInput = document.getElementById('totalAmount');
-  const addSaleBtn = document.getElementById('addSaleBtn');
-  const recentSalesDiv = document.getElementById('recentSales');
-  const uniformCategoryDiv = document.getElementById('uniformCategory');
-  const stockInfoDiv = document.getElementById('stockInfo');
-  const menuToggle = document.getElementById('menuToggle');
+        // Initialize Supabase
+        const supabaseUrl = "https://uyqpvhcjsflogujbfheu.supabase.co";
+        const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5cXB2aGNqc2Zsb2d1amJmaGV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY5MTQ4NzQsImV4cCI6MjA3MjQ5MDg3NH0.Yn75_sNjk8-bZhvFRyGZML3rLWro0W4tsBXhdcE6aDA";
+        const {
+            createClient
+        } = window.supabase;
+        const supabase = createClient(supabaseUrl, supabaseKey);
 
-  let uniforms = [];
-  let isAuthInitialized = false;
+        // DOM Elements
+        const uniformSelect = document.getElementById('uniformType');
+        const quantityInput = document.getElementById('quantity');
+        const unitPriceInput = document.getElementById('unitPrice');
+        const totalAmountInput = document.getElementById('totalAmount');
+        const addSaleBtn = document.getElementById('addSaleBtn');
+        const recentSalesDiv = document.getElementById('recentSales');
+        const uniformCategoryDiv = document.getElementById('uniformCategory');
+        const stockInfoDiv = document.getElementById('stockInfo');
+        const menuToggle = document.getElementById('menuToggle');
 
-  // Check authentication and redirect if needed
-  async function checkAuthAndRedirect() {
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
-      window.location.href = 'sales-login.html';
-      return false;
-    }
-    
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user && user.user_metadata?.must_change_password) {
-      window.location.href = 'sales-change-password.html';
-      return false;
-    }
-    
-    return true;
-  }
+        let uniforms = [];
+        let isAuthInitialized = false;
 
-  // Update current user display
-  async function updateCurrentUserDisplay() {
-    const userEl = document.createElement('span');
-    userEl.id = 'currentUser';
-    userEl.className = 'text-muted small ms-3';
-    userEl.style.marginLeft = 'auto';
-    
-    // Insert after the h2 element
-    const header = document.querySelector('main .d-flex.align-items-center.mb-4');
-    if (header && !document.getElementById('currentUser')) {
-      header.appendChild(userEl);
-    }
-    
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data: cashier, error } = await supabase
-        .from('cashiers')
-        .select('cashier_first_name, cashier_last_name')
-        .eq('user_id', user.id)
-        .single();
+        // Check authentication and redirect if needed
+        async function checkAuthAndRedirect() {
+            const {
+                data: {
+                    session
+                }
+            } = await supabase.auth.getSession();
 
-      let displayName = "User";
-      if (!error && cashier) {
-        displayName = `${cashier.cashier_first_name || ""} ${cashier.cashier_last_name || ""}`.trim();
-      } else {
-        displayName = user.email.split('@')[0];
-      }
-      
-      userEl.textContent = `Logged in as: ${displayName}`;
-      userEl.style.display = "inline";
-    }
-  }
-function printUniformReceipt(saleId, studentName, studentClass, uniformName, quantity, totalAmount, cashierFirstName = "", cashierLastName = "") {
-  const win = window.open('', '_blank', 'width=600,height=800');
-  if (!win) {
-    alert("Popup blocked! Please allow popups to print receipts.");
-    return;
-  }
+            if (!session) {
+                window.location.href = 'sales-login.html';
+                return false;
+            }
 
-  const date = new Date().toLocaleString();
-  const currentMonth = new Date().getMonth() + 1;
+            const {
+                data: {
+                    user
+                }
+            } = await supabase.auth.getUser();
+            if (user && user.user_metadata?.must_change_password) {
+                window.location.href = 'sales-change-password.html';
+                return false;
+            }
 
-  let term;
-  if (currentMonth >= 9 && currentMonth <= 12) {
-    term = "Term 1";
-  } else if (currentMonth >= 1 && currentMonth <= 4) {
-    term = "Term 2";
-  } else if (currentMonth >= 5 && currentMonth <= 8) {
-    term = "Term 3";
-  } else {
-    term = "—";
-  }
+            return true;
+        }
 
-  const displayName = (cashierFirstName || "") + " " + (cashierLastName || "");
-  const trimmedName = displayName.trim() || "Cashier";
+        // Update current user display
+        async function updateCurrentUserDisplay() {
+            const userEl = document.createElement('span');
+            userEl.id = 'currentUser';
+            userEl.className = 'text-muted small ms-3';
+            userEl.style.marginLeft = 'auto';
 
-  let html = `
+            // Insert after the h2 element
+            const header = document.querySelector('main .d-flex.align-items-center.mb-4');
+            if (header && !document.getElementById('currentUser')) {
+                header.appendChild(userEl);
+            }
+
+            const {
+                data: {
+                    user
+                }
+            } = await supabase.auth.getUser();
+            if (user) {
+                const {
+                    data: cashier,
+                    error
+                } = await supabase
+                    .from('cashiers')
+                    .select('cashier_first_name, cashier_last_name')
+                    .eq('user_id', user.id)
+                    .single();
+
+                let displayName = "User";
+                if (!error && cashier) {
+                    displayName = `${cashier.cashier_first_name || ""} ${cashier.cashier_last_name || ""}`.trim();
+                } else {
+                    displayName = user.email.split('@')[0];
+                }
+
+                userEl.textContent = `Logged in as: ${displayName}`;
+                userEl.style.display = "inline";
+            }
+        }
+
+        function printUniformReceipt(saleId, studentName, studentClass, uniformName, quantity, totalAmount, cashierFirstName = "", cashierLastName = "") {
+            const win = window.open('', '_blank', 'width=600,height=800');
+            if (!win) {
+                alert("Popup blocked! Please allow popups to print receipts.");
+                return;
+            }
+
+            const date = new Date().toLocaleString();
+            const currentMonth = new Date().getMonth() + 1;
+
+            let term;
+            if (currentMonth >= 9 && currentMonth <= 12) {
+                term = "Term 1";
+            } else if (currentMonth >= 1 && currentMonth <= 4) {
+                term = "Term 2";
+            } else if (currentMonth >= 5 && currentMonth <= 8) {
+                term = "Term 3";
+            } else {
+                term = "—";
+            }
+
+            const displayName = (cashierFirstName || "") + " " + (cashierLastName || "");
+            const trimmedName = displayName.trim() || "Cashier";
+
+            let html = `
     <!DOCTYPE html>
     <html>
     <head>
@@ -437,9 +468,9 @@ function printUniformReceipt(saleId, studentName, studentClass, uniformName, qua
 
       <div class="header">
         <div style="flex-shrink: 0; padding-right: 15px;">
-          <img 
-            id="receipt-logo" 
-            src="https://uyqpvhcjsflogujbfheu.supabase.co/storage/v1/object/public/image/logo.jpeg" 
+          <img
+            id="receipt-logo"
+            src="https://uyqpvhcjsflogujbfheu.supabase.co/storage/v1/object/public/image/logo.jpeg"
             alt="Royal Charisma School Logo"
             style="width: 90px; height: 90px; object-fit: contain;"
             onerror="this.outerHTML = '<div style=&quot;width:90px;height:90px;background:#f9f9f9;display:flex;align-items:center;justify-content:center;font-weight:bold;color:#aaa;border:1px dashed #ccc;&quot;>RC</div>';"
@@ -504,289 +535,311 @@ function printUniformReceipt(saleId, studentName, studentClass, uniformName, qua
     </body>
     </html>`;
 
-  win.document.write(html);
-  win.document.close();
-};
+            win.document.write(html);
+            win.document.close();
+        };
 
 
-  // Initialize
-  document.addEventListener('DOMContentLoaded', async () => {
-    const isAuthenticated = await checkAuthAndRedirect();
-    if (!isAuthenticated) return;
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async() => {
+            const isAuthenticated = await checkAuthAndRedirect();
+            if (!isAuthenticated) return;
 
-    
-    // Set up auth state listener
-    supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_OUT") {
-        window.location.href = "sales-login.html";
-      }
-    });
-    
-    await updateCurrentUserDisplay();
-    loadUniforms();
-    loadRecentSales();
-    
-    // Mobile menu toggle
-    menuToggle?.addEventListener('click', () => {
-      document.querySelector('.sidebar').classList.toggle('show');
-    });
-  });
 
-  // Load uniforms with category grouping
-  async function loadUniforms() {
-    try {
-      const { data, error } = await supabase
-        .from('uniforms')
-        .select('*')
-        .order('category')
-        .order('gender');
+            // Set up auth state listener
+            supabase.auth.onAuthStateChange((event, session) => {
+                if (event === "SIGNED_OUT") {
+                    window.location.href = "sales-login.html";
+                }
+            });
 
-      if (error) throw error;
-      
-      uniforms = data;
-      
-      // Category labels
-      const categoryLabels = {
-        full_set: 'Full Set',
-        half_set_top: 'Half Set (Top)',
-        half_set_bottom: 'Half Set (Bottom)',
-        pe_kit: 'P.E. Kit',
-        fabric: 'Fabric'
-      };
-      
-      // Gender labels
-      const genderLabels = {
-        boy: 'Boy',
-        girl: 'Girl',
-        unisex: 'Unisex'
-      };
-      
-      // Build grouped options
-      let html = '<option value="">Select a uniform item</option>';
-      
-      // Group by category
-      const categories = {};
-      data.forEach(item => {
-        const cat = item.category || 'other';
-        if (!categories[cat]) categories[cat] = [];
-        categories[cat].push(item);
-      });
-      
-      // Add optgroups
-      Object.entries(categories).forEach(([catKey, items]) => {
-        const label = categoryLabels[catKey] || catKey.replace('_', ' ');
-        html += `<optgroup label="${label}">`;
-        
-        items.forEach(item => {
-          const genderLabel = genderLabels[item.gender] ? ` (${genderLabels[item.gender]})` : '';
-          const stockClass = item.stock <= 5 ? 'stock-low' : 'stock-good';
-          const stockText = item.stock <= 5 ? 'LOW STOCK' : `${item.stock} in stock`;
-          
-          html += `
-            <option value="${item.id}" 
-                    data-price="${item.price}" 
+            await updateCurrentUserDisplay();
+            loadUniforms();
+            loadRecentSales();
+
+            // Mobile menu toggle
+            menuToggle ?.addEventListener('click', () => {
+                document.querySelector('.sidebar').classList.toggle('show');
+            });
+        });
+
+        // Load uniforms with category grouping
+        async function loadUniforms() {
+            try {
+                const {
+                    data,
+                    error
+                } = await supabase
+                    .from('uniforms')
+                    .select('*')
+                    .order('category')
+                    .order('gender');
+
+                if (error) throw error;
+
+                uniforms = data;
+
+                // Category labels
+                const categoryLabels = {
+                    full_set: 'Full Set',
+                    half_set_top: 'Half Set (Top)',
+                    half_set_bottom: 'Half Set (Bottom)',
+                    pe_kit: 'P.E. Kit',
+                    fabric: 'Fabric'
+                };
+
+                // Gender labels
+                const genderLabels = {
+                    boy: 'Boy',
+                    girl: 'Girl',
+                    unisex: 'Unisex'
+                };
+
+                // Build grouped options
+                let html = '<option value="">Select a uniform item</option>';
+
+                // Group by category
+                const categories = {};
+                data.forEach(item => {
+                    const cat = item.category || 'other';
+                    if (!categories[cat]) categories[cat] = [];
+                    categories[cat].push(item);
+                });
+
+                // Add optgroups
+                Object.entries(categories).forEach(([catKey, items]) => {
+                    const label = categoryLabels[catKey] || catKey.replace('_', ' ');
+                    html += `<optgroup label="${label}">`;
+
+                    items.forEach(item => {
+                        const genderLabel = genderLabels[item.gender] ? ` (${genderLabels[item.gender]})` : '';
+                        const stockClass = item.stock <= 5 ? 'stock-low' : 'stock-good';
+                        const stockText = item.stock <= 5 ? 'LOW STOCK' : `${item.stock} in stock`;
+
+                        html += `
+            <option value="${item.id}"
+                    data-price="${item.price}"
                     data-category="${catKey}"
                     data-gender="${item.gender}"
                     data-stock="${item.stock}">
               ${item.name}${genderLabel} - ₵${parseFloat(item.price).toFixed(2)}
               <span class="stock-badge ${stockClass}">${stockText}</span>
             </option>`;
-        });
-        
-        html += `</optgroup>`;
-      });
-      
-      uniformSelect.innerHTML = html;
-      
-    } catch (error) {
-      console.error('Error loading uniforms:', error);
-      uniformSelect.innerHTML = '<option value="">Error loading uniforms</option>';
-    }
-  }
+                    });
 
-  // Handle uniform selection
-  uniformSelect.addEventListener('change', () => {
-    const selectedOption = uniformSelect.options[uniformSelect.selectedIndex];
-    const price = selectedOption.getAttribute('data-price');
-    const category = selectedOption.getAttribute('data-category');
-    const stock = parseInt(selectedOption.getAttribute('data-stock')) || 0;
-    
-    // Update price
-    unitPriceInput.value = price ? parseFloat(price).toFixed(2) : '';
-    
-    // Update category display
-    if (category) {
-      const categoryLabels = {
-        full_set: 'Full Set',
-        half_set_top: 'Half Set (Top)',
-        half_set_bottom: 'Half Set (Bottom)',
-        pe_kit: 'P.E. Kit',
-        fabric: 'Fabric'
-      };
-      uniformCategoryDiv.textContent = categoryLabels[category] || category;
-      uniformCategoryDiv.classList.remove('d-none');
-    } else {
-      uniformCategoryDiv.classList.add('d-none');
-    }
-    
-    // Update stock info
-    if (stock !== null) {
-      const stockClass = stock <= 5 ? 'text-danger' : 'text-success';
-      const stockText = stock <= 5 
-        ? `⚠️ Only ${stock} left!` 
-        : `✅ ${stock} in stock`;
-      stockInfoDiv.innerHTML = `<span class="${stockClass}">${stockText}</span>`;
-      quantityInput.max = stock;
-      quantityInput.value = Math.min(parseInt(quantityInput.value) || 1, stock);
-    }
-    
-    calculateTotal();
-  });
+                    html += `</optgroup>`;
+                });
 
-  // Quantity change handler
-  quantityInput.addEventListener('input', () => {
-    const max = parseInt(quantityInput.max) || Infinity;
-    let value = parseInt(quantityInput.value) || 1;
-    if (value < 1) value = 1;
-    if (value > max) value = max;
-    quantityInput.value = value;
-    calculateTotal();
-  });
+                uniformSelect.innerHTML = html;
 
-  // Calculate total
-  function calculateTotal() {
-    const qty = parseFloat(quantityInput.value) || 0;
-    const price = parseFloat(unitPriceInput.value) || 0;
-    totalAmountInput.value = (qty * price).toFixed(2);
-  }
-
-  // Record sale
-// Record sale with receipt printing
-addSaleBtn.addEventListener('click', async () => {
-  const uniformId = uniformSelect.value;
-  const quantity = parseInt(quantityInput.value);
-  const total = parseFloat(totalAmountInput.value);
-  const studentName = document.getElementById('studentName').value.trim();
-  const studentClass = document.getElementById('studentClass').value.trim();
-  
-  // Get selected uniform name for receipt
-  const selectedOption = uniformSelect.options[uniformSelect.selectedIndex];
-  const uniformName = selectedOption ? selectedOption.textContent.split(' - ₵')[0] : 'Uniform Item';
-  
-  // Validation
-  if (!studentName || !studentClass) {
-    alert('Please enter student name and class.');
-    return;
-  }
-  
-  if (!uniformId || quantity < 1) {
-    alert('Please select a uniform and valid quantity.');
-    return;
-  }
-  
-  try {
-    // Get cashier info from logged-in user
-    const { data: { user } } = await supabase.auth.getUser();
-    let cashierFirstName = "", cashierLastName = "";
-    
-    if (user) {
-      const { data: cashier, error } = await supabase
-        .from('cashiers')
-        .select('cashier_first_name, cashier_last_name')
-        .eq('user_id', user.id)
-        .single();
-      
-      if (!error && cashier) {
-        cashierFirstName = cashier.cashier_first_name || "";
-        cashierLastName = cashier.cashier_last_name || "";
-      }
-    }
-    
-    // First, reduce the uniform stock
-    const { data: uniformData, error: stockError } = await supabase
-      .from('uniforms')
-      .select('stock')
-      .eq('id', uniformId)
-      .single();
-    
-    if (stockError) throw stockError;
-    
-    const currentStock = uniformData.stock;
-    if (currentStock < quantity) {
-      alert(`❌ Insufficient stock! Only ${currentStock} items available.`);
-      return;
-    }
-    
-    const newStock = currentStock - quantity;
-    const { error: updateError } = await supabase
-      .from('uniforms')
-      .update({ stock: newStock })
-      .eq('id', uniformId);
-    
-    if (updateError) throw updateError;
-    
-    // Then insert the sale record
-    const { data: saleData, error: saleError } = await supabase
-      .from('uniform_sales')
-      .insert([
-        { 
-          uniform_id: uniformId, 
-          quantity, 
-          total,
-          student_name: studentName,
-          student_class: studentClass,
-          cashier_first_name: cashierFirstName,
-          cashier_last_name: cashierLastName
+            } catch (error) {
+                console.error('Error loading uniforms:', error);
+                uniformSelect.innerHTML = '<option value="">Error loading uniforms</option>';
+            }
         }
-      ])
-      .select(); // Get the inserted sale data including ID
 
-    if (saleError) throw saleError;
-    
-    // Get the sale ID for receipt
-    const saleId = saleData[0].id;
-    
-    // Print receipt immediately
-    printUniformReceipt(
-      saleId,
-      studentName,
-      studentClass,
-      uniformName,
-      quantity,
-      total,
-      cashierFirstName,
-      cashierLastName
-    );
-    
-    // Success feedback
-    alert('✅ Sale recorded successfully!');
-    
-    // Reset form
-    document.getElementById('studentName').value = '';
-    document.getElementById('studentClass').value = '';
-    uniformSelect.value = '';
-    unitPriceInput.value = '';
-    totalAmountInput.value = '';
-    uniformCategoryDiv.classList.add('d-none');
-    stockInfoDiv.innerHTML = '';
-    quantityInput.value = '1';
-    
-    // Refresh uniforms (to update stock in dropdown) and recent sales
-    loadUniforms();
-    loadRecentSales();
-    
-  } catch (error) {
-    console.error('Error saving sale:', error);
-    alert('❌ Error saving sale: ' + (error.message || 'Unknown error'));
-  }
-});
+        // Handle uniform selection
+        uniformSelect.addEventListener('change', () => {
+            const selectedOption = uniformSelect.options[uniformSelect.selectedIndex];
+            const price = selectedOption.getAttribute('data-price');
+            const category = selectedOption.getAttribute('data-category');
+            const stock = parseInt(selectedOption.getAttribute('data-stock')) || 0;
 
-  // Load recent sales
-  async function loadRecentSales() {
-    try {
-      const { data, error } = await supabase
-        .from('uniform_sales')
-        .select(`
+            // Update price
+            unitPriceInput.value = price ? parseFloat(price).toFixed(2) : '';
+
+            // Update category display
+            if (category) {
+                const categoryLabels = {
+                    full_set: 'Full Set',
+                    half_set_top: 'Half Set (Top)',
+                    half_set_bottom: 'Half Set (Bottom)',
+                    pe_kit: 'P.E. Kit',
+                    fabric: 'Fabric'
+                };
+                uniformCategoryDiv.textContent = categoryLabels[category] || category;
+                uniformCategoryDiv.classList.remove('d-none');
+            } else {
+                uniformCategoryDiv.classList.add('d-none');
+            }
+
+            // Update stock info
+            if (stock !== null) {
+                const stockClass = stock <= 5 ? 'text-danger' : 'text-success';
+                const stockText = stock <= 5 ?
+                    `⚠️ Only ${stock} left!` :
+                    `✅ ${stock} in stock`;
+                stockInfoDiv.innerHTML = `<span class="${stockClass}">${stockText}</span>`;
+                quantityInput.max = stock;
+                quantityInput.value = Math.min(parseInt(quantityInput.value) || 1, stock);
+            }
+
+            calculateTotal();
+        });
+
+        // Quantity change handler
+        quantityInput.addEventListener('input', () => {
+            const max = parseInt(quantityInput.max) || Infinity;
+            let value = parseInt(quantityInput.value) || 1;
+            if (value < 1) value = 1;
+            if (value > max) value = max;
+            quantityInput.value = value;
+            calculateTotal();
+        });
+
+        // Calculate total
+        function calculateTotal() {
+            const qty = parseFloat(quantityInput.value) || 0;
+            const price = parseFloat(unitPriceInput.value) || 0;
+            totalAmountInput.value = (qty * price).toFixed(2);
+        }
+
+        // Record sale
+        // Record sale with receipt printing
+        addSaleBtn.addEventListener('click', async() => {
+            const uniformId = uniformSelect.value;
+            const quantity = parseInt(quantityInput.value);
+            const total = parseFloat(totalAmountInput.value);
+            const studentName = document.getElementById('studentName').value.trim();
+            const studentClass = document.getElementById('studentClass').value.trim();
+
+            // Get selected uniform name for receipt
+            const selectedOption = uniformSelect.options[uniformSelect.selectedIndex];
+            const uniformName = selectedOption ? selectedOption.textContent.split(' - ₵')[0] : 'Uniform Item';
+
+            // Validation
+            if (!studentName || !studentClass) {
+                alert('Please enter student name and class.');
+                return;
+            }
+
+            if (!uniformId || quantity < 1) {
+                alert('Please select a uniform and valid quantity.');
+                return;
+            }
+
+            try {
+                // Get cashier info from logged-in user
+                const {
+                    data: {
+                        user
+                    }
+                } = await supabase.auth.getUser();
+                let cashierFirstName = "",
+                    cashierLastName = "";
+
+                if (user) {
+                    const {
+                        data: cashier,
+                        error
+                    } = await supabase
+                        .from('cashiers')
+                        .select('cashier_first_name, cashier_last_name')
+                        .eq('user_id', user.id)
+                        .single();
+
+                    if (!error && cashier) {
+                        cashierFirstName = cashier.cashier_first_name || "";
+                        cashierLastName = cashier.cashier_last_name || "";
+                    }
+                }
+
+                // First, reduce the uniform stock
+                const {
+                    data: uniformData,
+                    error: stockError
+                } = await supabase
+                    .from('uniforms')
+                    .select('stock')
+                    .eq('id', uniformId)
+                    .single();
+
+                if (stockError) throw stockError;
+
+                const currentStock = uniformData.stock;
+                if (currentStock < quantity) {
+                    alert(`❌ Insufficient stock! Only ${currentStock} items available.`);
+                    return;
+                }
+
+                const newStock = currentStock - quantity;
+                const {
+                    error: updateError
+                } = await supabase
+                    .from('uniforms')
+                    .update({
+                        stock: newStock
+                    })
+                    .eq('id', uniformId);
+
+                if (updateError) throw updateError;
+
+                // Then insert the sale record
+                const {
+                    data: saleData,
+                    error: saleError
+                } = await supabase
+                    .from('uniform_sales')
+                    .insert([{
+                        uniform_id: uniformId,
+                        quantity,
+                        total,
+                        student_name: studentName,
+                        student_class: studentClass,
+                        cashier_first_name: cashierFirstName,
+                        cashier_last_name: cashierLastName
+                    }])
+                    .select(); // Get the inserted sale data including ID
+
+                if (saleError) throw saleError;
+
+                // Get the sale ID for receipt
+                const saleId = saleData[0].id;
+
+                // Print receipt immediately
+                printUniformReceipt(
+                    saleId,
+                    studentName,
+                    studentClass,
+                    uniformName,
+                    quantity,
+                    total,
+                    cashierFirstName,
+                    cashierLastName
+                );
+
+                // Success feedback
+                alert('✅ Sale recorded successfully!');
+
+                // Reset form
+                document.getElementById('studentName').value = '';
+                document.getElementById('studentClass').value = '';
+                uniformSelect.value = '';
+                unitPriceInput.value = '';
+                totalAmountInput.value = '';
+                uniformCategoryDiv.classList.add('d-none');
+                stockInfoDiv.innerHTML = '';
+                quantityInput.value = '1';
+
+                // Refresh uniforms (to update stock in dropdown) and recent sales
+                loadUniforms();
+                loadRecentSales();
+
+            } catch (error) {
+                console.error('Error saving sale:', error);
+                alert('❌ Error saving sale: ' + (error.message || 'Unknown error'));
+            }
+        });
+
+        // Load recent sales
+        async function loadRecentSales() {
+            try {
+                const {
+                    data,
+                    error
+                } = await supabase
+                    .from('uniform_sales')
+                    .select(`
           id,
           quantity,
           total,
@@ -797,26 +850,28 @@ addSaleBtn.addEventListener('click', async () => {
           cashier_first_name,
           cashier_last_name
         `)
-        .order('created_at', { ascending: false })
-        .limit(5);
+                    .order('created_at', {
+                        ascending: false
+                    })
+                    .limit(5);
 
-      if (error) throw error;
+                if (error) throw error;
 
-      if (!data || data.length === 0) {
-        recentSalesDiv.innerHTML = `
+                if (!data || data.length === 0) {
+                    recentSalesDiv.innerHTML = `
           <div class="text-center py-4 text-muted">
             <i class="fas fa-receipt fa-2x mb-2"></i>
             <p>No sales recorded yet</p>
           </div>
         `;
-        return;
-      }
+                    return;
+                }
 
-      recentSalesDiv.innerHTML = data.map(sale => {
-        const cashierName = (sale.cashier_first_name || "") + " " + (sale.cashier_last_name || "");
-        const trimmedCashier = cashierName.trim() || "Staff";
-        
-        return `
+                recentSalesDiv.innerHTML = data.map(sale => {
+                    const cashierName = (sale.cashier_first_name || "") + " " + (sale.cashier_last_name || "");
+                    const trimmedCashier = cashierName.trim() || "Staff";
+
+                    return `
         <div class="sale-item">
           <div class="d-flex justify-content-between">
             <div>
@@ -843,99 +898,109 @@ addSaleBtn.addEventListener('click', async () => {
           </div>
         </div>
       `;
-      }).join('');
-      
-    } catch (error) {
-      console.error('Error loading recent sales:', error);
-      recentSalesDiv.innerHTML = `
+                }).join('');
+
+            } catch (error) {
+                console.error('Error loading recent sales:', error);
+                recentSalesDiv.innerHTML = `
         <div class="text-center py-4 text-danger">
           <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
           <p>Failed to load sales</p>
         </div>
       `;
-    }
-  }
-  // Logout functionality
-async function handleLogout(e) {
-  e.preventDefault();
-  
-  if (!confirm("Are you sure you want to log out?")) {
-    return;
-  }
-  
-  try {
-    // Show loading state
-    const logoutBtn = document.getElementById('logoutBtn');
-    const originalText = logoutBtn.innerHTML;
-    logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing out...';
-    logoutBtn.style.pointerEvents = 'none';
-    
-    // Sign out from Supabase
-    const { error } = await supabase.auth.signOut();
-    
-    if (error) {
-      throw error;
-    }
-    
-    // Clear any local storage data
-    localStorage.removeItem("lastUsedBookId");
-    sessionStorage.clear();
-    
-    // Redirect to login page
-    window.location.href = "sales-login.html";
-    
-  } catch (err) {
-    console.error("Logout failed:", err);
-    alert("Failed to sign out. Please try again.");
-    
-    // Restore original button state
-    const logoutBtn = document.getElementById('logoutBtn');
-    logoutBtn.innerHTML = originalText;
-    logoutBtn.style.pointerEvents = 'auto';
-  }
-}
+            }
+        }
+        // Logout functionality
+        async function handleLogout(e) {
+            e.preventDefault();
 
-// Add event listener for logout
-document.addEventListener('DOMContentLoaded', () => {
-  const logoutBtn = document.getElementById('logoutBtn');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', handleLogout);
-  }
-  
-// Function to reduce uniform stock
-async function reduceUniformStock(uniformId, quantity) {
-  try {
-    // Get current stock
-    const { data: uniformData, error: fetchError } = await supabase
-      .from('uniforms')
-      .select('stock')
-      .eq('id', uniformId)
-      .single();
+            if (!confirm("Are you sure you want to log out?")) {
+                return;
+            }
 
-    if (fetchError) throw fetchError;
+            try {
+                // Show loading state
+                const logoutBtn = document.getElementById('logoutBtn');
+                const originalText = logoutBtn.innerHTML;
+                logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing out...';
+                logoutBtn.style.pointerEvents = 'none';
 
-    const currentStock = uniformData.stock;
-    const newStock = currentStock - quantity;
+                // Sign out from Supabase
+                const {
+                    error
+                } = await supabase.auth.signOut();
 
-    if (newStock < 0) {
-      throw new Error('Not enough stock available');
-    }
+                if (error) {
+                    throw error;
+                }
 
-    // Update stock
-    const { error: updateError } = await supabase
-      .from('uniforms')
-      .update({ stock: newStock })
-      .eq('id', uniformId);
+                // Clear any local storage data
+                localStorage.removeItem("lastUsedBookId");
+                sessionStorage.clear();
 
-    if (updateError) throw updateError;
+                // Redirect to login page
+                window.location.href = "sales-login.html";
 
-    return true;
-  } catch (error) {
-    console.error('Error reducing uniform stock:', error);
-    throw error;
-  }
-}
-});
-</script>
+            } catch (err) {
+                console.error("Logout failed:", err);
+                alert("Failed to sign out. Please try again.");
+
+                // Restore original button state
+                const logoutBtn = document.getElementById('logoutBtn');
+                logoutBtn.innerHTML = originalText;
+                logoutBtn.style.pointerEvents = 'auto';
+            }
+        }
+
+        // Add event listener for logout
+        document.addEventListener('DOMContentLoaded', () => {
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', handleLogout);
+            }
+
+            // Function to reduce uniform stock
+            async function reduceUniformStock(uniformId, quantity) {
+                try {
+                    // Get current stock
+                    const {
+                        data: uniformData,
+                        error: fetchError
+                    } = await supabase
+                        .from('uniforms')
+                        .select('stock')
+                        .eq('id', uniformId)
+                        .single();
+
+                    if (fetchError) throw fetchError;
+
+                    const currentStock = uniformData.stock;
+                    const newStock = currentStock - quantity;
+
+                    if (newStock < 0) {
+                        throw new Error('Not enough stock available');
+                    }
+
+                    // Update stock
+                    const {
+                        error: updateError
+                    } = await supabase
+                        .from('uniforms')
+                        .update({
+                            stock: newStock
+                        })
+                        .eq('id', uniformId);
+
+                    if (updateError) throw updateError;
+
+                    return true;
+                } catch (error) {
+                    console.error('Error reducing uniform stock:', error);
+                    throw error;
+                }
+            }
+        });
+    </script>
 </body>
+
 </html>
