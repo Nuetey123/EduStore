@@ -22,19 +22,22 @@
 
   <!-- Custom CSS -->
   <link rel="stylesheet" href="../css/sales-dashboard.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
   <div class="d-flex">
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="logo">EduStore</div>
-      <nav>
-        <a href="#" class="active">🏠 Dashboard</a>
-        <a href="uniform-sales.html">➕  Uniforms</a>
-        <a href="#">🧾 Transactions</a>
-        <a href="#">👤 Profile</a>
-        <a href="#" id="logoutBtn">🚪 Logout</a>
-      </nav>
+   <nav>
+  <a href="sales-dashboard.html" class="active"><i class="fas fa-home"></i> Dashboard</a>
+  <a href="uniform-sales.html"><i class="fas fa-tshirt"></i> Uniform Sales</a>
+ <a href="admission-sales.html"><i class="fas fa-user-plus"></i> New Admission</a>
+  <a href="#"><i class="fas fa-file-invoice"></i> Transactions</a>
+  <a href="#" id="logoutBtn" class="logout-link">
+    <i class="fas fa-sign-out-alt"></i> Logout
+  </a>
+</nav>
     </aside>
 
     <!-- Main Content -->
@@ -50,31 +53,29 @@
 
       <div class="container-fluid p-3">
         <!-- Stats Cards -->
-        <section class="stats">
-          <div class="card">
-            <h2>📘 Books Sold Today</h2>
-            <p id="booksSold">0</p>
-          </div>
-          <div class="card">
-            <h2>👩‍🎓 Students Served</h2>
-            <p id="studentsServed">0</p>
-          </div>
-          <div class="card">
-            <h2>💵 Sales Today</h2>
-            <p class="sales-amount" id="salesToday">₵0</p>
-          </div>
-          <!-- ✅ Low Stock Card — Improved Layout -->
-          <div class="col-12 col-md-6 col-lg-4">
-            <div class="card shadow-sm p-3" style="min-height: 200px;">
-              <h2 class="h6 text-center mb-3">⚠️ Low Stock</h2>
-              <div id="lowStockList" class="text-center" style="overflow-y: auto; max-height: 300px; padding: 0 10px;">
-                <!-- Books will appear here -->
-              </div>
-            </div>
-          </div>
-        </section>
-        
-        
+        <!-- Stats Cards -->
+<section class="stats-grid">
+  <div class="stat-card">
+    <h2>📘 Books Sold Today</h2>
+    <p id="booksSold">0</p>
+  </div>
+  <div class="stat-card">
+    <h2>👩‍🎓 Students Served</h2>
+    <p id="studentsServed">0</p>
+  </div>
+  <div class="stat-card">
+    <h2>💵 Sales Today</h2>
+    <p class="sales-amount" id="salesToday">₵0</p>
+  </div>
+  <div class="stat-card">
+    <h2 class="h6">⚠️ Low Stock</h2>
+    <div id="lowStockList" class="low-stock-content">
+      <!-- Books will appear here -->
+    </div>
+  </div>
+</section>
+
+
 
         <div class="row g-3">
           <!-- New Sale Form -->
@@ -100,19 +101,19 @@
                       <option value="">-- Choose Book --</option>
                     </select>
                   </div>
-                  
+
                   <div class="col-6 col-md-3">
                     <label for="quantity" class="form-label">Quantity</label>
                     <input type="number" id="quantity" class="form-control" min="1" value="1" max="1">
                     <small class="text-muted" id="availableStock">0 available in stock</small>
                   </div>
-                  
+
                   <div class="col-6 col-md-3">
                     <button type="button" id="addBook" class="btn btn-primary w-100">➕ Add</button>
                   </div>
                 </div>
 
-                
+
                 <h3 class="h6">🛒 Cart</h3>
                 <div class="table-responsive">
                   <table class="table table-bordered table-sm" id="cartTable">
@@ -142,17 +143,17 @@
           <section class="transactions col-12 col-lg-6">
             <div class="card shadow-sm p-3">
               <h2 class="h5 mb-3">🧾 Recent Transactions</h2>
-              
+
               <!-- ✅ Add Search Box -->
               <div class="mb-3">
-                <input 
-                  type="text" 
-                  id="studentSearch" 
-                  class="form-control" 
+                <input
+                  type="text"
+                  id="studentSearch"
+                  class="form-control"
                   placeholder="Search by student name..."
                 >
               </div>
-          
+
               <div class="table-responsive">
                 <table class="table table-striped table-hover">
                   <thead>
@@ -162,7 +163,7 @@
                       <th>Books</th>
                       <th>Total</th>
                       <th>Date</th>
-                      
+
                     </tr>
                   </thead>
                   <tbody id="transactionTable">
@@ -179,7 +180,7 @@
 
  <script type="module">
   import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-  
+
   const SUPABASE_URL = "https://uyqpvhcjsflogujbfheu.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5cXB2aGNqc2Zsb2d1amJmaGV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY5MTQ4NzQsImV4cCI6MjA3MjQ5MDg3NH0.Yn75_sNjk8-bZhvFRyGZML3rLWro0W4tsBXhdcE6aDA";
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -281,14 +282,14 @@ async function getCurrentCashier() {
     const { data: { session }, error } = await supabase.auth.getSession();
 
     isAuthInitialized = true;
-    
+
     if (!session) {
       window.location.href = "sales-login.html";
       return;
     }
 
     const { data: { user } } = await supabase.auth.getUser();
-    
+
     // Check if user needs to change password
     if (user && user.user_metadata?.must_change_password) {
       window.location.href = 'sales-change-password.html';
@@ -319,18 +320,18 @@ async function getCurrentCashier() {
   // ----------------- Sidebar Toggle -----------------
   const menuBtn = document.querySelector(".menu-toggle");
   const sidebar = document.querySelector(".sidebar");
-  menuBtn.addEventListener("click", () => sidebar.classList.toggle("show")); 
+  menuBtn.addEventListener("click", () => sidebar.classList.toggle("show"));
 
   // ----------------- Select2 & Load Books -----------------
   let bookPrices = {};
   let bookStock = {};
   let bookTitles = {};
-  
+
 
   $(document).ready(async function() {
-    $('#book').select2({ 
-      placeholder: "Search ", 
-      allowClear: true, 
+    $('#book').select2({
+      placeholder: "Search ",
+      allowClear: true,
       width: '100%',
       language: {
         noResults: () => "No books found. Try another search."
@@ -365,7 +366,7 @@ async function getCurrentCashier() {
     } else {
       console.error("Error loading books:", error);
     }
-  });  
+  });
 
   // ----------------- Stock Display (Books) -----------------
   $('#book').on('change', function() {
@@ -404,8 +405,8 @@ async function getCurrentCashier() {
     row.innerHTML = `
       <td>${title}</td>
       <td>
-        <input type="number" class="form-control form-control-sm qty-input" 
-               value="${qty}" min="1" max="${stockObj[id]}" 
+        <input type="number" class="form-control form-control-sm qty-input"
+               value="${qty}" min="1" max="${stockObj[id]}"
                data-book-id="${id}">
       </td>
       <td>₵${price.toFixed(2)}</td>
@@ -637,9 +638,9 @@ printReceipt(saleId, studentName, studentClass, saleItems, totalAmount, cashierF
 
       <div class="header">
         <div style="flex-shrink: 0; padding-right: 15px;">
-          <img 
-            id="receipt-logo" 
-            src="https://uyqpvhcjsflogujbfheu.supabase.co/storage/v1/object/public/image/logo.jpeg" 
+          <img
+            id="receipt-logo"
+            src="https://uyqpvhcjsflogujbfheu.supabase.co/storage/v1/object/public/image/logo.jpeg"
             alt="Royal Charisma School Logo"
             style="width: 90px; height: 90px; object-fit: contain;"
             onerror="this.outerHTML = '<div style=&quot;width:90px;height:90px;background:#f9f9f9;display:flex;align-items:center;justify-content:center;font-weight:bold;color:#aaa;border:1px dashed #ccc;&quot;>RC</div>';"
@@ -740,7 +741,7 @@ printReceipt(saleId, studentName, studentClass, saleItems, totalAmount, cashierF
 
       const saleIds = sales.map(s => s.id);
       let booksSold = 0;
-      
+
       if (saleIds.length > 0) {
         const { data: saleItems, error: itemsError } = await supabase
           .from('sale_items')
@@ -926,10 +927,10 @@ printReceipt(saleId, studentName, studentClass, saleItems, totalAmount, cashierF
 
   document.getElementById('studentSearch').addEventListener('input', function(e) {
     const searchTerm = e.target.value.toLowerCase().trim();
-    
+
     if (!window.allTransactions) return;
 
-    const filtered = window.allTransactions.filter(sale => 
+    const filtered = window.allTransactions.filter(sale =>
       sale.student_name.toLowerCase().includes(searchTerm)
     );
 
@@ -958,8 +959,8 @@ printReceipt(saleId, studentName, studentClass, saleItems, totalAmount, cashierF
             <td>₵${sale.total.toFixed(2)}</td>
             <td>${new Date(sale.created_at).toLocaleString()}</td>
             <td>
-              <button 
-                class="btn btn-sm btn-outline-secondary js-reprint" 
+              <button
+                class="btn btn-sm btn-outline-secondary js-reprint"
                 data-sale-id="${sale.id}">
                 🖨 Print
               </button>
@@ -1003,7 +1004,7 @@ printReceipt(saleId, studentName, studentClass, saleItems, totalAmount, cashierF
 
     try {
       const { error } = await supabase.auth.signOut();
-      
+
       if (error) {
         throw error;
       }
