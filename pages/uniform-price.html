@@ -250,6 +250,19 @@
         </div>
       </div>
     </div>
+    <!-- Level Fees Card -->
+<div class="col-12 mt-4">
+  <div class="card p-4">
+    <h5 class="mb-4 fw-bold text-primary"><i class="fas fa-graduation-cap me-2"></i>Level Fees Management</h5>
+    <div id="levelsContainer">
+      <div class="text-center py-3">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
     <!-- Stats Card -->
     <div class="col-lg-4">
@@ -374,24 +387,48 @@
 
   // Initialize
   document.addEventListener('DOMContentLoaded', () => {
-    loadUniforms();
+  loadUniforms();
+  loadLevels(); // ✅ Load levels too
 
-    // Mobile menu toggle
-    menuToggle?.addEventListener('click', () => {
-      document.querySelector('.sidebar').classList.toggle('show');
-    });
-
-    // Add uniform button
-    addUniformBtn.addEventListener('click', () => {
-      document.getElementById('uniformModalLabel').textContent = 'Add New Uniform';
-      uniformForm.reset();
-      document.getElementById('uniformId').value = '';
-      uniformModal.show();
-    });
-
-    // Save uniform button
-    saveUniformBtn.addEventListener('click', saveUniform);
+  // Mobile menu toggle
+  menuToggle?.addEventListener('click', () => {
+    document.querySelector('.sidebar').classList.toggle('show');
   });
+
+  // Add uniform button
+  addUniformBtn.addEventListener('click', () => {
+    document.getElementById('uniformModalLabel').textContent = 'Add New Uniform';
+    uniformForm.reset();
+    document.getElementById('uniformId').value = '';
+    uniformModal.show();
+  });
+
+  // Save uniform button
+  saveUniformBtn.addEventListener('click', saveUniform);
+
+  // ✅ EVENT DELEGATION FOR UNIFORM BUTTONS
+  uniformsContainer.addEventListener('click', (e) => {
+    const editBtn = e.target.closest('.edit-uniform-btn');
+    const deleteBtn = e.target.closest('.delete-uniform-btn');
+
+    if (editBtn) {
+      const id = parseInt(editBtn.dataset.id);
+      editUniform(id);
+    } else if (deleteBtn) {
+      const id = parseInt(deleteBtn.dataset.id);
+      deleteUniform(id);
+    }
+  });
+
+  // ✅ EVENT DELEGATION FOR LEVEL FEE SAVE BUTTONS
+  document.getElementById('levelsContainer').addEventListener('click', (e) => {
+    const saveBtn = e.target.closest('.save-level-fee');
+    if (saveBtn) {
+      const id = saveBtn.dataset.id;
+      saveLevelFees(id);
+    }
+  });
+});
 
   // Load uniforms from database
 
@@ -457,10 +494,10 @@
                 </div>
               </div>
               <div>
-                <button class="btn action-btn btn-outline-primary" onclick="editUniform(${item.id})">
+                <button class="btn action-btn btn-outline-primary edit-uniform-btn" data-id="${item.id}">
                   <i class="fas fa-edit"></i>
                 </button>
-                <button class="btn action-btn btn-outline-danger" onclick="deleteUniform(${item.id})">
+                <button class="btn action-btn btn-outline-danger delete-uniform-btn" data-id="${item.id}">
                   <i class="fas fa-trash"></i>
                 </button>
               </div>
@@ -604,6 +641,130 @@
       `;
     }
   }
+  // =============== LEVELS MANAGEMENT ===============
+let levels = [];
+
+// Load levels
+async function loadLevels() {
+  try {
+    const { data, error } = await supabase
+      .from('levels')
+      .select('*')
+      .order('name');
+
+    if (error) throw error;
+    levels = data;
+    renderLevels(data);
+  } catch (error) {
+    console.error('Error loading levels:', error);
+    document.getElementById('levelsContainer').innerHTML = `
+      <div class="alert alert-danger">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        Failed to load level fees: ${error.message}
+      </div>
+    `;
+  }
+}
+
+// Render levels as editable rows
+function renderLevels(levels) {
+  if (!levels || levels.length === 0) {
+    document.getElementById('levelsContainer').innerHTML = `
+      <p class="text-muted">No levels found. Ensure the 'levels' table exists with the 5 standard levels.</p>
+    `;
+    return;
+  }
+
+  let html = `
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Level</th>
+            <th>Admission Fee (₵)</th>
+            <th>Tuition Fee (₵)</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+
+  levels.forEach(level => {
+    html += `
+      <tr>
+        <td><strong>${level.name}</strong></td>
+        <td>
+          <input type="number" step="0.01" min="0"
+                 class="form-control form-control-sm fee-input"
+                 data-id="${level.id}"
+                 data-field="admission_fee"
+                 value="${level.admission_fee || 0}">
+        </td>
+        <td>
+          <input type="number" step="0.01" min="0"
+                 class="form-control form-control-sm fee-input"
+                 data-id="${level.id}"
+                 data-field="tuition_fee"
+                 value="${level.tuition_fee || 0}">
+        </td>
+        <td>
+
+            <button class="btn btn-sm btn-primary save-level-fee" data-id="${level.id}">
+              <i class="fas fa-save"></i> Save
+            </button>
+        </td>
+      </tr>
+    `;
+  });
+
+  html += `
+        </tbody>
+      </table>
+    </div>
+    <div class="alert alert-info mt-3">
+      <i class="fas fa-info-circle me-2"></i>
+      Admins: Enter the correct fees and click <strong>Save</strong> for each level.
+    </div>
+  `;
+
+  document.getElementById('levelsContainer').innerHTML = html;
+}
+
+// Save fees for a specific level
+async function saveLevelFees(levelId) {
+  const admissionInput = document.querySelector(`input[data-id="${levelId}"][data-field="admission_fee"]`);
+  const tuitionInput = document.querySelector(`input[data-id="${levelId}"][data-field="tuition_fee"]`);
+
+  const admission = parseFloat(admissionInput.value) || 0;
+  const tuition = parseFloat(tuitionInput.value) || 0;
+
+  if (admission < 0 || tuition < 0) {
+    alert('Fees cannot be negative.');
+    return;
+  }
+
+  try {
+    const { error } = await supabase
+      .from('levels')
+      .update({
+        admission_fee: admission,
+        tuition_fee: tuition
+      })
+      .eq('id', levelId);
+
+    if (error) throw error;
+
+    alert('✅ Fees updated successfully!');
+    loadLevels(); // refresh
+
+  } catch (error) {
+    console.error('Error updating fees:', error);
+    alert('❌ Failed to save fees: ' + (error.message || 'Unknown error'));
+  }
+}
+
+
+
 </script>
 </body>
 </html>
